@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raags Database</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header>
+    <h1>🎵 Raags Database</h1>
+    <nav>
+      <a href="raags.html">Raags</a>
+      <a href="thaats.html">Thaats</a>
+      <a href="tetrachords.html">Tetrachords</a>
+      <div style="position: relative;">
+        <button class="menu-btn">☰ Menu</button>
+        <div class="menu-dropdown">
+          <div class="menu-section">
+            <h3>Login</h3>
+            <button onclick="alert('Login functionality coming soon!')">Login</button>
+          </div>
+          
+          <div class="menu-section">
+            <h3>Display Settings</h3>
+            <label><input type="radio" name="notation" value="hindustani" checked> Hindustani Sargam</label>
+            <label><input type="radio" name="notation" value="carnatic"> Carnatic Sargam</label>
+            <label><input type="radio" name="notation" value="western"> Western Notation</label>
+            <label><input type="radio" name="notation" value="midi"> MIDI Values</label>
+          </div>
+          
+          <div class="menu-section">
+            <h3>Visibility Settings</h3>
+            <label><input type="checkbox" class="column-toggle" data-column="id" checked> ID</label>
+            <label><input type="checkbox" class="column-toggle" data-column="name" checked> Name</label>
+            <label><input type="checkbox" class="column-toggle" data-column="aaroh" checked> Aaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="avaroh" checked> Avaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="thaat_id" checked> Thaat</label>
+            <label><input type="checkbox" class="column-toggle" data-column="aarohID" checked> AarohID</label>
+            <label><input type="checkbox" class="column-toggle" data-column="avarohID" checked> AvarohID</label>
+            <label><input type="checkbox" class="column-toggle" data-column="jaati_aaroh" checked> Jaati Aaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="jaati_avaroh" checked> Jaati Avaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="varient_difference" checked> Variant Diff</label>
+            <label><input type="checkbox" class="column-toggle" data-column="alternate_names" checked> Alt Names</label>
+            <label><input type="checkbox" class="column-toggle" data-column="shuddhataa_rank" checked> Shuddhataa</label>
+            <label><input type="checkbox" class="column-toggle" data-column="largest_gap" checked> Largest Gap</label>
+            <label><input type="checkbox" class="column-toggle" data-column="ang_difference_aaroh" checked> Ang Diff Aaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="ang_difference_avaroh" checked> Ang Diff Avaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="dimension" checked> Dimension</label>
+            <label><input type="checkbox" class="column-toggle" data-column="popularity" checked> Popularity</label>
+            <label><input type="checkbox" class="column-toggle" data-column="imperfect" checked> Imperfect</label>
+            <label><input type="checkbox" class="column-toggle" data-column="detached" checked> Detached</label>
+            <label><input type="checkbox" class="column-toggle" data-column="sa-ga_sangati_avaroh" checked> Sa-Ga Sangati Avaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="sa-ga_sangati_aaroh" checked> Sa-Ga Sangati Aaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="sa-pa_sangati_avaroh" checked> Sa-Pa Sangati Avaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="sa-pa_sangati_aaroh" checked> Sa-Pa Sangati Aaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="svarset" checked> Svarset</label>
+            <label><input type="checkbox" class="column-toggle" data-column="binary_aaroh" checked> Binary Aaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="binary_avaroh" checked> Binary Avaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="poorvaang_size_avaroh" checked> Poorvaang Size Avaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="uttaraang_size_avaroh" checked> Uttaraang Size Avaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="poorvaang_size_aaroh" checked> Poorvaang Size Aaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="uttaraang_size_aaroh" checked> Uttaraang Size Aaroh</label>
+            <label><input type="checkbox" class="column-toggle" data-column="svarsetID" checked> SvarsetID</label>
+            <label><input type="checkbox" class="column-toggle" data-column="smallest_gap" checked> Smallest Gap</label>
+            <label><input type="checkbox" class="column-toggle" data-column="skipped_svar" checked> Skipped Svar</label>
+            <label><input type="checkbox" class="column-toggle" data-column="both_variants" checked> Both Variants</label>
+            <label><input type="checkbox" class="column-toggle" data-column="common_svar" checked> Common Svar</label>
+            <label><input type="checkbox" class="column-toggle" data-column="common_svar_poorvaang" checked> Common Svar Poorvaang</label>
+            <label><input type="checkbox" class="column-toggle" data-column="common_svar_uttaraang" checked> Common Svar Uttaraang</label>
+            <label><input type="checkbox" class="column-toggle" data-column="raag_counter" checked> Raag Counter</label>
+            <label><input type="checkbox" class="column-toggle" data-column="aaroh_counter" checked> Aaroh Counter</label>
+            <label><input type="checkbox" class="column-toggle" data-column="avaroh_counter" checked> Avaroh Counter</label>
+            <label><input type="checkbox" class="column-toggle" data-column="raag_number" checked> Raag Number</label>
+            <label><input type="checkbox" class="column-toggle" data-column="binary_svarset" checked> Binary Svarset</label>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="controls">
+      <div class="control-row">
+        <div class="search-box">
+          <label for="aaroh-search">Search Aaroh</label>
+          <input type="text" id="aaroh-search" placeholder="Enter svar value (e.g., 0, 2, 4...)">
+        </div>
+        <div class="search-box">
+          <label for="avaroh-search">Search Avaroh</label>
+          <input type="text" id="avaroh-search" placeholder="Enter svar value (e.g., 12, 11, 9...)">
+        </div>
+      </div>
+      
+      <div class="control-row">
+        <div class="filter-group">
+          <label for="varient-filter">Variant Difference</label>
+          <select id="varient-filter">
+            <option value="all">All</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="gap-filter">Largest Gap</label>
+          <select id="gap-filter">
+            <option value="all">All</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="thaat-filter">Thaat ID</label>
+          <select id="thaat-filter">
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="control-row">
+        <button onclick="applyFilters()" style="padding: 0.6rem 2rem; background: var(--electric-turquoise); color: var(--darker-purple); border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Apply Filters</button>
+        <button onclick="resetFilters()" style="padding: 0.6rem 2rem; background: var(--medium-purple); color: var(--electric-turquoise); border: 1px solid var(--electric-purple); border-radius: 5px; cursor: pointer;">Reset</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-column="id">ID</th>
+            <th class="sortable" data-column="name">Name</th>
+            <th class="sortable" data-column="aaroh">Aaroh</th>
+            <th class="sortable" data-column="avaroh">Avaroh</th>
+            <th class="sortable" data-column="thaat_id">Thaat</th>
+            <th class="sortable" data-column="aarohID">AarohID</th>
+            <th class="sortable" data-column="avarohID">AvarohID</th>
+            <th class="sortable" data-column="jaati_aaroh">Jaati Aaroh</th>
+            <th class="sortable" data-column="jaati_avaroh">Jaati Avaroh</th>
+            <th class="sortable" data-column="varient_difference">Variant Diff</th>
+            <th class="sortable" data-column="alternate_names">Alt Names</th>
+            <th class="sortable" data-column="shuddhataa_rank">Shuddhataa</th>
+            <th class="sortable" data-column="largest_gap">Largest Gap</th>
+            <th class="sortable" data-column="ang_difference_aaroh">Ang Diff Aaroh</th>
+            <th class="sortable" data-column="ang_difference_avaroh">Ang Diff Avaroh</th>
+            <th class="sortable" data-column="dimension">Dimension</th>
+            <th class="sortable" data-column="popularity">Popularity</th>
+            <th class="sortable" data-column="imperfect">Imperfect</th>
+            <th class="sortable" data-column="detached">Detached</th>
+            <th class="sortable" data-column="sa-ga_sangati_avaroh">Sa-Ga Sangati Avaroh</th>
+            <th class="sortable" data-column="sa-ga_sangati_aaroh">Sa-Ga Sangati Aaroh</th>
+            <th class="sortable" data-column="sa-pa_sangati_avaroh">Sa-Pa Sangati Avaroh</th>
+            <th class="sortable" data-column="sa-pa_sangati_aaroh">Sa-Pa Sangati Aaroh</th>
+            <th class="sortable" data-column="svarset">Svarset</th>
+            <th class="sortable" data-column="binary_aaroh">Binary Aaroh</th>
+            <th class="sortable" data-column="binary_avaroh">Binary Avaroh</th>
+            <th class="sortable" data-column="poorvaang_size_avaroh">Poorvaang Size Avaroh</th>
+            <th class="sortable" data-column="uttaraang_size_avaroh">Uttaraang Size Avaroh</th>
+            <th class="sortable" data-column="poorvaang_size_aaroh">Poorvaang Size Aaroh</th>
+            <th class="sortable" data-column="uttaraang_size_aaroh">Uttaraang Size Aaroh</th>
+            <th class="sortable" data-column="svarsetID">SvarsetID</th>
+            <th class="sortable" data-column="smallest_gap">Smallest Gap</th>
+            <th class="sortable" data-column="skipped_svar">Skipped Svar</th>
+            <th class="sortable" data-column="both_variants">Both Variants</th>
+            <th class="sortable" data-column="common_svar">Common Svar</th>
+            <th class="sortable" data-column="common_svar_poorvaang">Common Svar Poorvaang</th>
+            <th class="sortable" data-column="common_svar_uttaraang">Common Svar Uttaraang</th>
+            <th class="sortable" data-column="raag_counter">Raag Counter</th>
+            <th class="sortable" data-column="aaroh_counter">Aaroh Counter</th>
+            <th class="sortable" data-column="avaroh_counter">Avaroh Counter</th>
+            <th class="sortable" data-column="raag_number">Raag Number</th>
+            <th class="sortable" data-column="binary_svarset">Binary Svarset</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="42" style="text-align: center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Hindustani Raag Database | Data-driven classical music exploration</p>
+  </footer>
+
+  <script src="svarmap.js"></script>
+  <script src="database.js"></script>
+  <script src="table-utils.js"></script>
+  <script>
+    let tetrachordsData = [];
+    let thaatsData = [];
+    let allRaagsData = [];
+
+    // Binary columns that should NOT be converted to svar notation
+    const binaryColumns = ['binary_aaroh', 'binary_avaroh', 'binary_svarset'];
+    
+    // Columns containing svar arrays that should be converted
+    const svarArrayColumns = ['aaroh', 'avaroh', 'svarset'];
+
+    // Load reference data
+    async function loadReferenceData() {
+      try {
+        tetrachordsData = await fetchTableData('tetrachords');
+        thaatsData = await fetchTableData('thaats');
+      } catch (error) {
+        console.error('Error loading reference data:', error);
+      }
+    }
+
+    // Get tetrachord name by ID
+    function getTetrachordName(id) {
+      const tetrachord = tetrachordsData.find(t => t.id == id);
+      return tetrachord ? tetrachord.name : id;
+    }
+
+    // Get thaat name by ID
+    function getThaatName(id) {
+      const thaat = thaatsData.find(t => t.id == id);
+      if (!thaat) return id;
+      const poorvaangName = getTetrachordName(thaat.poorvaang_tetrachord_id);
+      const uttaraangName = getTetrachordName(thaat.uttaraang_tetrachord_id);
+      return `${poorvaangName}–${uttaraangName}`;
+    }
+
+    // Format array for display
+    function formatArray(arr, columnName, notation) {
+      if (!arr || !Array.isArray(arr)) return '-';
+      
+      // Binary columns - display as comma-separated 0s and 1s
+      if (binaryColumns.includes(columnName)) {
+        return arr.join(',');
+      }
+      
+      // Svar array columns - convert based on notation
+      if (svarArrayColumns.includes(columnName)) {
+        return convertSvarArray(arr, notation);
+      }
+      
+      // Other arrays - display as JSON
+      return JSON.stringify(arr);
+    }
+
+    // Page-specific rendering with thaat name lookup
+    function renderRaagTable(data) {
+      const tbody = document.querySelector('tbody');
+      const notation = getCurrentNotation();
+      
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+      
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="42" style="text-align: center; padding: 2rem;">No results found</td></tr>';
+        return;
+      }
+      
+      const columns = Object.keys(data[0]);
+      
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        
+        columns.forEach(column => {
+          const td = document.createElement('td');
+          let value = row[column];
+          
+          // Special handling for thaat_id - show name instead
+          if (column === 'thaat_id') {
+            td.textContent = value ? getThaatName(value) : '-';
+          }
+          // Format based on data type
+          else if (value === null || value === undefined) {
+            td.textContent = '-';
+          } else if (Array.isArray(value)) {
+            td.textContent = formatArray(value, column, notation);
+          } else if (typeof value === 'object') {
+            td.textContent = JSON.stringify(value);
+          } else {
+            td.textContent = value;
+          }
+          
+          tr.appendChild(td);
+        });
+        
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadData() {
+      showLoading();
+      try {
+        await loadReferenceData();
+        allRaagsData = await fetchTableData('raags');
+        
+        // Sort by ID by default
+        allRaagsData.sort((a, b) => (a.id || 0) - (b.id || 0));
+        
+        renderRaagTable(allRaagsData);
+        setupSorting(document.querySelector('table'));
+        
+        // Populate thaat filter
+        const thaatFilter = document.getElementById('thaat-filter');
+        const uniqueThaats = [...new Set(allRaagsData.map(r => r.thaat_id).filter(Boolean))].sort((a,b) => a-b);
+        uniqueThaats.forEach(id => {
+          const option = document.createElement('option');
+          option.value = id;
+          option.textContent = `${id} - ${getThaatName(id)}`;
+          thaatFilter.appendChild(option);
+        });
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    async function applyFilters() {
+      showLoading();
+      try {
+        const aarohSearch = document.getElementById('aaroh-search').value.trim();
+        const avarohSearch = document.getElementById('avaroh-search').value.trim();
+        const varientFilter = document.getElementById('varient-filter').value;
+        const gapFilter = document.getElementById('gap-filter').value;
+        const thaatFilter = document.getElementById('thaat-filter').value;
+
+        let data = [...allRaagsData];
+
+        // Search filters
+        if (aarohSearch) {
+          const searchNum = parseInt(aarohSearch);
+          if (!isNaN(searchNum)) {
+            data = data.filter(row => {
+              const arr = row.aaroh;
+              return arr && Array.isArray(arr) && arr.includes(searchNum);
+            });
+          }
+        }
+        
+        if (avarohSearch) {
+          const searchNum = parseInt(avarohSearch);
+          if (!isNaN(searchNum)) {
+            data = data.filter(row => {
+              const arr = row.avaroh;
+              return arr && Array.isArray(arr) && arr.includes(searchNum);
+            });
+          }
+        }
+
+        // Other filters
+        if (varientFilter !== 'all') {
+          data = data.filter(row => row.varient_difference == varientFilter);
+        }
+        if (gapFilter !== 'all') {
+          data = data.filter(row => row.largest_gap == gapFilter);
+        }
+        if (thaatFilter !== 'all') {
+          data = data.filter(row => row.thaat_id == thaatFilter);
+        }
+
+        renderRaagTable(data);
+        setupSorting(document.querySelector('table'));
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    function resetFilters() {
+      document.getElementById('aaroh-search').value = '';
+      document.getElementById('avaroh-search').value = '';
+      document.getElementById('varient-filter').value = 'all';
+      document.getElementById('gap-filter').value = 'all';
+      document.getElementById('thaat-filter').value = 'all';
+      
+      // Sort by ID and render
+      allRaagsData.sort((a, b) => (a.id || 0) - (b.id || 0));
+      renderRaagTable(allRaagsData);
+      setupSorting(document.querySelector('table'));
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initializePage('raags');
+      loadData();
+    });
+  </script>
+</body>
+</html>
