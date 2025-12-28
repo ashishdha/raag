@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thaats Database</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header>
+    <h1>🎼 Thaats Database</h1>
+    <nav>
+      <a href="raags.html">Raags</a>
+      <a href="thaats.html">Thaats</a>
+      <a href="tetrachords.html">Tetrachords</a>
+      <div style="position: relative;">
+        <button class="menu-btn">☰ Menu</button>
+        <div class="menu-dropdown">
+          <div class="menu-section">
+            <h3>Login</h3>
+            <button onclick="alert('Login functionality coming soon!')">Login</button>
+          </div>
+          
+          <div class="menu-section">
+            <h3>Display Settings</h3>
+            <label><input type="radio" name="notation" value="hindustani" checked> Hindustani Sargam</label>
+            <label><input type="radio" name="notation" value="carnatic"> Carnatic Sargam</label>
+            <label><input type="radio" name="notation" value="western"> Western Notation</label>
+            <label><input type="radio" name="notation" value="midi"> MIDI Values</label>
+          </div>
+          
+          <div class="menu-section">
+            <h3>Visibility Settings</h3>
+            <label><input type="checkbox" class="column-toggle" data-column="id" checked> ID</label>
+            <label><input type="checkbox" class="column-toggle" data-column="name" checked> Name</label>
+            <label><input type="checkbox" class="column-toggle" data-column="scale" checked> Scale</label>
+            <label><input type="checkbox" class="column-toggle" data-column="representative_raag" checked> Representative Raag</label>
+            <label><input type="checkbox" class="column-toggle" data-column="vikrit_svar" checked> Vikrit Svar</label>
+            <label><input type="checkbox" class="column-toggle" data-column="poorvaang_tetrachord_id" checked> Poorvaang ID</label>
+            <label><input type="checkbox" class="column-toggle" data-column="uttaraang_tetrachord_id" checked> Uttaraang ID</label>
+            <label><input type="checkbox" class="column-toggle" data-column="shuddhataa_rank" checked> Shuddhataa Rank</label>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="controls">
+      <div class="control-row">
+        <div class="search-box">
+          <label for="scale-search">Search Scale (e.g., S R G M P)</label>
+          <input type="text" id="scale-search" placeholder="Enter svar in sargam (S, r, R, g, G, M, m, P, d, D, n, N)">
+        </div>
+      </div>
+      
+      <div class="control-row">
+        <div class="filter-group">
+          <label for="vikrit-filter">Vikrit Svar</label>
+          <select id="vikrit-filter">
+            <option value="all">All</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <div style="margin-top: 0.3rem;">
+            <label style="font-size: 0.75rem; display: inline; margin-right: 0.5rem;">
+              <input type="radio" name="vikrit-mode" value="min" checked> At Least
+            </label>
+            <label style="font-size: 0.75rem; display: inline;">
+              <input type="radio" name="vikrit-mode" value="max"> At Most
+            </label>
+          </div>
+        </div>
+        
+        <div class="filter-group">
+          <label for="shuddhataa-filter">Shuddhataa Rank</label>
+          <select id="shuddhataa-filter">
+            <option value="all">All</option>
+            <option value="21">21</option>
+            <option value="24">24</option>
+            <option value="26">26</option>
+            <option value="27">27</option>
+            <option value="28">28</option>
+            <option value="29">29</option>
+            <option value="30">30</option>
+            <option value="31">31</option>
+            <option value="32">32</option>
+            <option value="33">33</option>
+            <option value="34">34</option>
+            <option value="35">35</option>
+            <option value="36">36</option>
+            <option value="37">37</option>
+            <option value="38">38</option>
+            <option value="39">39</option>
+            <option value="40">40</option>
+            <option value="41">41</option>
+            <option value="42">42</option>
+            <option value="43">43</option>
+            <option value="44">44</option>
+            <option value="45">45</option>
+            <option value="47">47</option>
+            <option value="50">50</option>
+          </select>
+          <div style="margin-top: 0.3rem;">
+            <label style="font-size: 0.75rem; display: inline; margin-right: 0.5rem;">
+              <input type="radio" name="shuddhataa-mode" value="min" checked> At Least
+            </label>
+            <label style="font-size: 0.75rem; display: inline;">
+              <input type="radio" name="shuddhataa-mode" value="max"> At Most
+            </label>
+          </div>
+        </div>
+        
+        <div class="filter-group">
+          <label for="poorvaang-filter">Poorvaang Tetrachord</label>
+          <select id="poorvaang-filter">
+            <option value="all">All</option>
+            <option value="1">1 - bilaaval</option>
+            <option value="2">2 - bhairav</option>
+            <option value="3">3 - kaafee</option>
+            <option value="4">4 - bhairavee</option>
+            <option value="5">5 - yaman</option>
+            <option value="6">6 - maarvaa</option>
+            <option value="7">7 - madhuvanti</option>
+            <option value="8">8 - toDee</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="uttaraang-filter">Uttaraang Tetrachord</label>
+          <select id="uttaraang-filter">
+            <option value="all">All</option>
+            <option value="9">9 - bilaaval</option>
+            <option value="10">10 - bhairav</option>
+            <option value="11">11 - kaafee</option>
+            <option value="12">12 - bhairavee</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="control-row">
+        <button onclick="applyFilters()" style="padding: 0.6rem 2rem; background: var(--electric-turquoise); color: var(--darker-purple); border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Apply Filters</button>
+        <button onclick="resetFilters()" style="padding: 0.6rem 2rem; background: var(--medium-purple); color: var(--electric-turquoise); border: 1px solid var(--electric-purple); border-radius: 5px; cursor: pointer;">Reset</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-column="id">ID</th>
+            <th class="sortable" data-column="name">Name</th>
+            <th class="sortable" data-column="scale">Scale</th>
+            <th class="sortable" data-column="representative_raag">Representative Raag</th>
+            <th class="sortable" data-column="vikrit_svar">Vikrit Svar</th>
+            <th class="sortable" data-column="poorvaang_tetrachord_id">Poorvaang ID</th>
+            <th class="sortable" data-column="uttaraang_tetrachord_id">Uttaraang ID</th>
+            <th class="sortable" data-column="shuddhataa_rank">Shuddhataa Rank</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="8" style="text-align: center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Hindustani Raag Database | Data-driven classical music exploration</p>
+  </footer>
+
+  <script src="svarmap.js"></script>
+  <script src="database.js"></script>
+  <script src="table-utils.js"></script>
+  <script>
+    let tetrachordsData = [];
+    let allThaatsData = [];
+
+    // Load tetrachords for lookup
+    async function loadTetrachords() {
+      try {
+        tetrachordsData = await fetchTableData('tetrachords');
+      } catch (error) {
+        console.error('Error loading tetrachords:', error);
+      }
+    }
+
+    // Get tetrachord name by ID
+    function getTetrachordName(id) {
+      const tetrachord = tetrachordsData.find(t => t.id == id);
+      return tetrachord ? tetrachord.name : id;
+    }
+
+    // Page-specific rendering with name column
+    function renderThaatTable(data) {
+      const tbody = document.querySelector('tbody');
+      const notation = getCurrentNotation();
+      
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+      
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">No results found</td></tr>';
+        return;
+      }
+      
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        
+        // ID
+        const tdId = document.createElement('td');
+        tdId.textContent = row.id;
+        tr.appendChild(tdId);
+        
+        // Name (combined tetrachord names)
+        const tdName = document.createElement('td');
+        const poorvaangName = getTetrachordName(row.poorvaang_tetrachord_id);
+        const uttaraangName = getTetrachordName(row.uttaraang_tetrachord_id);
+        tdName.textContent = `${poorvaangName}–${uttaraangName}`;
+        tr.appendChild(tdName);
+        
+        // Scale
+        const tdScale = document.createElement('td');
+        tdScale.textContent = convertSvarArray(row.scale, notation);
+        tr.appendChild(tdScale);
+        
+        // Representative Raag
+        const tdRaag = document.createElement('td');
+        tdRaag.textContent = row.representative_raag || '-';
+        tr.appendChild(tdRaag);
+        
+        // Vikrit Svar
+        const tdVikrit = document.createElement('td');
+        tdVikrit.textContent = row.vikrit_svar;
+        tr.appendChild(tdVikrit);
+        
+        // Poorvaang ID
+        const tdPoorvaang = document.createElement('td');
+        tdPoorvaang.textContent = row.poorvaang_tetrachord_id;
+        tr.appendChild(tdPoorvaang);
+        
+        // Uttaraang ID
+        const tdUttaraang = document.createElement('td');
+        tdUttaraang.textContent = row.uttaraang_tetrachord_id;
+        tr.appendChild(tdUttaraang);
+        
+        // Shuddhataa Rank
+        const tdShuddhataa = document.createElement('td');
+        tdShuddhataa.textContent = row.shuddhataa_rank;
+        tr.appendChild(tdShuddhataa);
+        
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadData() {
+      showLoading();
+      try {
+        await loadTetrachords();
+        allThaatsData = await fetchTableData('thaats');
+        
+        // Sort by ID by default
+        allThaatsData.sort((a, b) => a.id - b.id);
+        
+        renderThaatTable(allThaatsData);
+        setupSorting(document.querySelector('table'));
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    async function applyFilters() {
+      showLoading();
+      try {
+        const scaleSearch = document.getElementById('scale-search').value.trim();
+        const vikritFilter = document.getElementById('vikrit-filter').value;
+        const vikritMode = document.querySelector('input[name="vikrit-mode"]:checked').value;
+        const shuddhataaFilter = document.getElementById('shuddhataa-filter').value;
+        const shuddhataaMode = document.querySelector('input[name="shuddhataa-mode"]:checked').value;
+        const poorvaangFilter = document.getElementById('poorvaang-filter').value;
+        const uttaraangFilter = document.getElementById('uttaraang-filter').value;
+
+        let data = [...allThaatsData];
+
+        // Scale search - must contain ALL svar entered
+        if (scaleSearch) {
+          const searchInts = sargamToInt(scaleSearch);
+          if (searchInts.length > 0) {
+            data = data.filter(row => {
+              const scale = row.scale;
+              return searchInts.every(svar => scale.includes(svar));
+            });
+          }
+        }
+
+        // Vikrit svar filter with min/max
+        if (vikritFilter !== 'all') {
+          const vikritValue = parseInt(vikritFilter);
+          if (vikritMode === 'min') {
+            data = data.filter(row => parseInt(row.vikrit_svar) >= vikritValue);
+          } else {
+            data = data.filter(row => parseInt(row.vikrit_svar) <= vikritValue);
+          }
+        }
+
+        // Shuddhataa rank filter with min/max
+        if (shuddhataaFilter !== 'all') {
+          const shuddhataaValue = parseInt(shuddhataaFilter);
+          if (shuddhataaMode === 'min') {
+            data = data.filter(row => parseInt(row.shuddhataa_rank) >= shuddhataaValue);
+          } else {
+            data = data.filter(row => parseInt(row.shuddhataa_rank) <= shuddhataaValue);
+          }
+        }
+
+        // Tetrachord filters
+        if (poorvaangFilter !== 'all') {
+          data = data.filter(row => row.poorvaang_tetrachord_id == poorvaangFilter);
+        }
+        if (uttaraangFilter !== 'all') {
+          data = data.filter(row => row.uttaraang_tetrachord_id == uttaraangFilter);
+        }
+
+        renderThaatTable(data);
+        setupSorting(document.querySelector('table'));
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    function resetFilters() {
+      document.getElementById('scale-search').value = '';
+      document.getElementById('vikrit-filter').value = 'all';
+      document.getElementById('shuddhataa-filter').value = 'all';
+      document.querySelector('input[name="vikrit-mode"][value="min"]').checked = true;
+      document.querySelector('input[name="shuddhataa-mode"][value="min"]').checked = true;
+      document.getElementById('poorvaang-filter').value = 'all';
+      document.getElementById('uttaraang-filter').value = 'all';
+      
+      // Sort by ID and render
+      allThaatsData.sort((a, b) => a.id - b.id);
+      renderThaatTable(allThaatsData);
+      setupSorting(document.querySelector('table'));
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initializePage('thaats');
+      loadData();
+    });
+  </script>
+</body>
+</html>

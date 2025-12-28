@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetrachords Database</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header>
+    <h1>🎶 Tetrachords Database</h1>
+    <nav>
+      <a href="raags.html">Raags</a>
+      <a href="thaats.html">Thaats</a>
+      <a href="tetrachords.html">Tetrachords</a>
+      <div style="position: relative;">
+        <button class="menu-btn">☰ Menu</button>
+        <div class="menu-dropdown">
+          <div class="menu-section">
+            <h3>Login</h3>
+            <button onclick="alert('Login functionality coming soon!')">Login</button>
+          </div>
+          
+          <div class="menu-section">
+            <h3>Display Settings</h3>
+            <label><input type="radio" name="notation" value="hindustani" checked> Hindustani Sargam</label>
+            <label><input type="radio" name="notation" value="carnatic"> Carnatic Sargam</label>
+            <label><input type="radio" name="notation" value="western"> Western Notation</label>
+            <label><input type="radio" name="notation" value="midi"> MIDI Values</label>
+          </div>
+          
+          <div class="menu-section">
+            <h3>Visibility Settings</h3>
+            <label><input type="checkbox" class="column-toggle" data-column="id" checked> ID</label>
+            <label><input type="checkbox" class="column-toggle" data-column="name" checked> Name</label>
+            <label><input type="checkbox" class="column-toggle" data-column="scale" checked> Scale</label>
+            <label><input type="checkbox" class="column-toggle" data-column="alt_name" checked> Alt Name</label>
+            <label><input type="checkbox" class="column-toggle" data-column="vikrit_svar" checked> Vikrit Svar</label>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="controls">
+      <div class="control-row">
+        <div class="filter-group">
+          <label for="vikrit-filter">Vikrit Svar</label>
+          <select id="vikrit-filter">
+            <option value="all">All</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="name-filter">Name</label>
+          <select id="name-filter">
+            <option value="all">All</option>
+            <option value="bilaaval">bilaaval</option>
+            <option value="bhairav">bhairav</option>
+            <option value="kaafee">kaafee</option>
+            <option value="bhairavee">bhairavee</option>
+            <option value="yaman">yaman</option>
+            <option value="maarvaa">maarvaa</option>
+            <option value="madhuvanti">madhuvanti</option>
+            <option value="toDee">toDee</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="control-row">
+        <button onclick="applyFilters()" style="padding: 0.6rem 2rem; background: var(--electric-turquoise); color: var(--darker-purple); border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Apply Filters</button>
+        <button onclick="resetFilters()" style="padding: 0.6rem 2rem; background: var(--medium-purple); color: var(--electric-turquoise); border: 1px solid var(--electric-purple); border-radius: 5px; cursor: pointer;">Reset</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-column="id">ID</th>
+            <th class="sortable" data-column="name">Name</th>
+            <th class="sortable" data-column="scale">Scale</th>
+            <th class="sortable" data-column="alt_name">Alt Name</th>
+            <th class="sortable" data-column="vikrit_svar">Vikrit Svar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Hindustani Raag Database | Data-driven classical music exploration</p>
+  </footer>
+
+  <script src="svarmap.js"></script>
+  <script src="database.js"></script>
+  <script src="table-utils.js"></script>
+  <script>
+    // Page-specific logic
+    async function loadData() {
+      showLoading();
+      try {
+        const data = await fetchTableData('tetrachords');
+        renderTable(data);
+        setupSorting(document.querySelector('table'));
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    async function applyFilters() {
+      showLoading();
+      try {
+        const vikritFilter = document.getElementById('vikrit-filter').value;
+        const nameFilter = document.getElementById('name-filter').value;
+
+        const filters = {};
+        if (vikritFilter !== 'all') filters.vikrit_svar = vikritFilter;
+        if (nameFilter !== 'all') filters.name = nameFilter;
+
+        const data = await fetchTableData('tetrachords', filters);
+        renderTable(data);
+        setupSorting(document.querySelector('table'));
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    function resetFilters() {
+      document.getElementById('vikrit-filter').value = 'all';
+      document.getElementById('name-filter').value = 'all';
+      loadData();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initializePage('tetrachords');
+      loadData(); // Call loadData after initialization
+    });
+  </script>
+</body>
+</html>
