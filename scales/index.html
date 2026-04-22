@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎼 Scales Database</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── PAGE HEADER ── -->
+<header class="page-header">
+  <div>
+    <h1>🎼 SCALES DATABASE</h1>
+    <div class="subtitle">HINDUSTAANEE SCALE THEORY · 4096 CHROMATIC PERMUTATIONS</div>
+  </div>
+  <nav class="nav-links">
+    <a href="raags.html">Raags</a>
+    <a href="thaats.html">Thaats</a>
+    <a href="scales.html" class="active">Scales</a>
+    <a href="tetrachords.html">Tetrachords</a>
+
+    <!-- ── PREFS MENU ── -->
+    <div class="prefs-menu-wrap">
+      <button class="btn-prefs" onclick="togglePrefsMenu(event)">⚙ Preferences</button>
+      <div class="prefs-dropdown" id="prefsDropdown">
+
+        <div class="prefs-section">
+          <div class="prefs-section-title">Notation System</div>
+          <div class="pref-notation pref-item" data-value="Hindustaanee Sargam">Hindustaanee Sargam</div>
+          <div class="pref-notation pref-item" data-value="Integers (0-11)">Integers (0–11)</div>
+          <div class="pref-notation pref-item" data-value="Scale Degrees (Jazz)">Scale Degrees (Jazz)</div>
+          <div class="pref-notation pref-item" data-value="Western Notation (in C)">Western Notation (in C)</div>
+          <div class="pref-notation pref-item" data-value="Carnatic Sargam">Carnatic Sargam</div>
+        </div>
+
+        <div class="prefs-divider"></div>
+
+        <div class="prefs-section">
+          <div class="prefs-section-title">Columns Visible</div>
+          <div class="pref-columns pref-item" data-value="Minimum">Minimum</div>
+          <div class="pref-columns pref-item" data-value="Contracted">Contracted</div>
+          <div class="pref-columns pref-item" data-value="Standard">Standard</div>
+          <div class="pref-columns pref-item" data-value="Expanded">Expanded</div>
+          <div class="pref-columns pref-item" data-value="Maximum">Maximum</div>
+        </div>
+
+        <div class="prefs-divider"></div>
+
+        <div class="prefs-section">
+          <div class="prefs-section-title">Filter Presets</div>
+          <div class="pref-preset pref-item" data-value="Anarchy">Anarchy</div>
+          <div class="pref-preset pref-item" data-value="Outliers">Outliers</div>
+          <div class="pref-preset pref-item" data-value="Normal">Normal</div>
+          <div class="pref-preset pref-item" data-value="Easy">Easy</div>
+          <div class="pref-preset pref-item" data-value="Restrictive">Restrictive</div>
+        </div>
+
+      </div><!-- end prefs-dropdown -->
+    </div><!-- end prefs-menu-wrap -->
+
+  </nav>
+</header>
+
+<!-- ── TOOLBAR: toggle + stats ── -->
+<div class="toolbar">
+  <button class="btn btn-toggle" id="toggleFiltersBtn" onclick="toggleFilters()">Hide Filters</button>
+  <div class="controls-stats"><span id="rowCount">—</span> scales matching</div>
+  <button class="btn btn-apply" onclick="applyFilters()">Apply</button>
+  <button class="btn btn-reset" onclick="resetFilters()">Reset</button>
+</div>
+
+<!-- ── FILTERS PANEL ── -->
+<div id="filtersPanel" class="controls">
+
+  <!-- ROW 1: svar search + violations + consec varjit + thaat -->
+  <div class="controls-row">
+
+    <div class="control-group">
+      <label>Svar Present in Aaroh</label>
+      <input id="svarSearch" class="input-wide" type="text"
+             placeholder="eg: S R G M P  or  0 2 4 5 7">
+    </div>
+
+    <div class="control-group">
+      <label>Varjit Svar (Absent)</label>
+      <input id="varjitSearch" class="input-wide" type="text"
+             placeholder="eg: r g  or  1 3">
+    </div>
+
+    <div class="control-group">
+      <label>Violations</label>
+      <select id="violationsVal">
+        <option value="any">Any</option>
+        <option value="0">0 — No violations</option>
+        <option value="1">1 — No Saa</option>
+        <option value="2">2 — Skipped svar</option>
+        <option value="3">3 — Below minimum svar</option>
+        <option value="4">4 — No Saa + Skipped</option>
+        <option value="5">5 — Skipped + Below min</option>
+        <option value="6">6 — No Saa + Below min</option>
+        <option value="7">7 — All three flags</option>
+      </select>
+    </div>
+
+	<div class="control-group">
+	  <label>Consecutive Varjit Svar</label>
+	  <div class="input-pair">
+		<select id="consecOp" class="input-op">
+		  <option value="lte">At most</option>
+		  <option value="exactly">Exactly</option>
+		  <option value="gte">At least</option>
+		</select>
+		<input id="consecVal" class="input-val" type="number" min="0" max="7" placeholder="0–7">
+	  </div>
+	</div>
+
+    <!-- THAAT: custom dropdown -->
+    <div class="control-group">
+      <label>Thaat</label>
+      <div class="thaat-dd-wrap">
+        <button class="thaat-dd-trigger" id="thaatTrigger">All thaats ▾</button>
+        <div class="thaat-dd-panel" id="thaatMultiWrap">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end row 1 -->
+
+  <!-- ROW 2: numeric filters -->
+  <div class="controls-row">
+
+    <div class="control-group">
+      <label>Jaati</label>
+      <div class="input-pair">
+        <select id="jaatiOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="jaatiVal" class="input-val" type="number" min="0" max="7" placeholder="0–7">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Both Variants</label>
+      <div class="input-pair">
+        <select id="bothVariantsOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="bothVariantsVal" class="input-val" type="number" min="0" max="5" placeholder="0–5">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Vikrit Svar (Thaat)</label>
+      <div class="input-pair">
+        <select id="vikritOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="vikritVal" class="input-val" type="number" min="0" max="5" placeholder="0–5">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Ang Balance</label>
+      <div class="input-pair">
+        <select id="angMin" class="input-op" title="Minimum">
+          <option value="">Min</option>
+          <option value="-6">-6</option><option value="-5">-5</option>
+          <option value="-4">-4</option><option value="-3">-3</option>
+          <option value="-2">-2</option><option value="-1">-1</option>
+          <option value="0">0</option>  <option value="1">1</option>
+          <option value="2">2</option>  <option value="3">3</option>
+          <option value="4">4</option>  <option value="5">5</option>
+        </select>
+        <span class="range-sep">to</span>
+        <select id="angMax" class="input-op" title="Maximum">
+          <option value="">Max</option>
+          <option value="-6">-6</option><option value="-5">-5</option>
+          <option value="-4">-4</option><option value="-3">-3</option>
+          <option value="-2">-2</option><option value="-1">-1</option>
+          <option value="0">0</option>  <option value="1">1</option>
+          <option value="2">2</option>  <option value="3">3</option>
+          <option value="4">4</option>  <option value="5">5</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Svarsthaan Count</label>
+      <div class="input-pair">
+        <select id="svcOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="svcVal" class="input-val" type="number" min="0" max="12" placeholder="0–12">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Poorvaang Size</label>
+      <div class="input-pair">
+        <select id="poorOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="poorVal" class="input-val" type="number" min="0" max="7" placeholder="0–7">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Uttaraang Size</label>
+      <div class="input-pair">
+        <select id="uttOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="uttVal" class="input-val" type="number" min="0" max="6" placeholder="0–6">
+      </div>
+    </div>
+
+  </div><!-- end row 2 -->
+
+  <!-- ROW 3: samvaad, symmetry, chains, gaps, imperfect/detached -->
+  <div class="controls-row">
+
+    <div class="control-group">
+      <label>Samvaad at Pa</label>
+      <div class="input-pair">
+        <select id="sampOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <select id="sampVal" class="input-op"><!-- populated by JS --></select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Samvaad at Ma</label>
+      <div class="input-pair">
+        <select id="sammOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <select id="sammVal" class="input-op"><!-- populated by JS --></select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Symmetry Score</label>
+      <div class="input-pair">
+        <select id="symOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <select id="symVal" class="input-op"><!-- populated by JS --></select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Largest Pa Chain</label>
+      <div class="input-pair">
+        <select id="lpacOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="lpacVal" class="input-val" type="number" min="0" max="7" placeholder="0–7">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Pa Chain Count</label>
+      <div class="input-pair">
+        <select id="paccOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="paccVal" class="input-val" type="number" min="0" max="6" placeholder="0–6">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Largest Ga Chain</label>
+      <div class="input-pair">
+        <select id="lgacOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="lgacVal" class="input-val" type="number" min="0" max="4" placeholder="0–4">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Ga Chain Count</label>
+      <div class="input-pair">
+        <select id="gaccOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="gaccVal" class="input-val" type="number" min="0" max="6" placeholder="0–6">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Largest Gap</label>
+      <div class="input-pair">
+        <select id="lgapOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="lgapVal" class="input-val" type="number" min="1" max="12" placeholder="1–12">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Smallest Gap</label>
+      <div class="input-pair">
+        <select id="sgapOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="sgapVal" class="input-val" type="number" min="1" max="6" placeholder="1–6">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Imperfect Svar #</label>
+      <div class="input-pair">
+        <select id="impOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="impVal" class="input-val" type="number" min="0" max="12" placeholder="0–12">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Detached Svar #</label>
+      <div class="input-pair">
+        <select id="detOp" class="input-op">
+          <option value="exactly">Exactly</option>
+          <option value="lte">At most</option>
+          <option value="gte">At least</option>
+        </select>
+        <input id="detVal" class="input-val" type="number" min="0" max="12" placeholder="0–12">
+      </div>
+    </div>
+
+  </div><!-- end row 3 -->
+
+</div><!-- end filtersPanel -->
+
+<!-- ── TABLE ── -->
+<div class="table-wrap" id="tableWrap">
+  <table id="scalesTable">
+    <thead>
+      <tr>
+        <th class="col-id sort-asc" data-sort="id"                 onclick="sortBy('id')">ID</th>
+        <th class="col-aaroh"  data-sort="aaroh"                   onclick="sortBy('aaroh')">Aaroh</th>
+        <th class="col-jaati"  data-sort="jaati"                   onclick="sortBy('jaati')">Jaati</th>
+        <th class="col-consec" data-sort="consecutive_varjit_svar" onclick="sortBy('consecutive_varjit_svar')">Consec Varjit</th>
+        <th class="col-saa"    data-sort="saa_present"             onclick="sortBy('saa_present')">Saa</th>
+        <th class="col-both"   data-sort="both_variants"           onclick="sortBy('both_variants')">Both Var</th>
+        <th class="col-ang"    data-sort="ang_balance"             onclick="sortBy('ang_balance')">Ang Bal</th>
+        <th class="col-thaat"  data-sort="thaat"                   onclick="sortBy('thaat')">Thaat</th>
+        <th class="col-shuddh" data-sort="shuddhataa_rank"         onclick="sortBy('shuddhataa_rank')">Shuddhataa</th>
+        <th class="col-samp"   data-sort="samvaad_at_pa"           onclick="sortBy('samvaad_at_pa')">Sam Pa</th>
+        <th class="col-samm"   data-sort="samvaad_at_ma"           onclick="sortBy('samvaad_at_ma')">Sam Ma</th>
+        <th class="col-pac"    data-sort="saa_pa_chains_count"     onclick="sortBy('saa_pa_chains_count')">Pa Chains</th>
+        <th class="col-lpac"   data-sort="largest_saa_pa_chain"    onclick="sortBy('largest_saa_pa_chain')">Lg Pa Ch</th>
+        <th class="col-pacc"   data-sort="saa_pa_chains_count"     onclick="sortBy('saa_pa_chains_count')">Pa Ch #</th>
+        <th class="col-gac"    data-sort="saa_ga_chains_count"     onclick="sortBy('saa_ga_chains_count')">Ga Chains</th>
+        <th class="col-lgac"   data-sort="largest_saa_ga_chain"    onclick="sortBy('largest_saa_ga_chain')">Lg Ga Ch</th>
+        <th class="col-gacc"   data-sort="saa_ga_chains_count"     onclick="sortBy('saa_ga_chains_count')">Ga Ch #</th>
+        <th class="col-lgap"   data-sort="largest_gap"             onclick="sortBy('largest_gap')">Lg Gap</th>
+        <th class="col-sgap"   data-sort="smallest_gap"            onclick="sortBy('smallest_gap')">Sm Gap</th>
+        <th class="col-moor"   data-sort="moorchhanaa_family"      onclick="sortBy('moorchhanaa_family')">Moorchhanaa</th>
+        <th class="col-saach"  >Saa Chords</th>
+        <th class="col-saachn" >Saa Chord Names</th>
+        <th class="col-aggch"  >Aggregate Chord</th>
+        <th class="col-chords" >Chords</th>
+        <th class="col-imp"    >Imperfect</th>
+        <th class="col-det"    >Detached</th>
+        <th class="col-sym"    data-sort="symmetry"                onclick="sortBy('symmetry')">Sym</th>
+        <th class="col-svc"    data-sort="svarsthaan_count"        onclick="sortBy('svarsthaan_count')">Svar #</th>
+        <th class="col-poor"   data-sort="poorvaang_size"          onclick="sortBy('poorvaang_size')">Poor</th>
+        <th class="col-utt"    data-sort="uttaraang_size"          onclick="sortBy('uttaraang_size')">Utt</th>
+        <th class="col-int"    >Intervals</th>
+        <th class="col-bin"    >Binary</th>
+        <th class="col-viol"   data-sort="violations"              onclick="sortBy('violations')">Viol</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr><td colspan="33" class="loading">Loading scales</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script src="utils.js"></script>
+<script src="scales.js"></script>
+</body>
+</html>
