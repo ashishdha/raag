@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Periodic Table of Raags & Scales</title>
+
+  <link rel="stylesheet" href="calc.css">
+</head>
+<body>  
+  
+  <div class="dashboard">
+    <div class="panel" id="controls" style="opacity: 0.5; pointer-events: none;">
+      
+      <label for="dimension">Raag Dimension</label>
+      <select id="dimension">
+        <option value="1">1D (Same Aaroh & Avaroh)</option>
+        <option value="2" selected>2D (Different Aaroh & Avaroh)</option>
+      </select>
+
+      <div class="section-title">1D Base Constraints</div>
+
+      <div class="filter-group">
+        <label>Jaati (Number of Svar)</label>
+        <div class="slider-row"><span class="sub-label">Min</span><input type="range" id="jaatiMin" min="0" max="7" value="3"><span class="val-display" id="valJaatiMin">3</span></div>
+        <div class="slider-row"><span class="sub-label">Max</span><input type="range" id="jaatiMax" min="3" max="7" value="7"><span class="val-display" id="valJaatiMax">7</span></div>
+      </div>
+
+      <div class="filter-group"><label>Consecutive Varjit Svar (Max) <span class="val-display" id="valConsecutive">2</span></label><input type="range" id="maxConsecutive" min="0" max="7" value="2"></div>
+      
+      <div class="filter-group"><label>Saa Present</label><div class="radio-group"><label><input type="radio" name="saaPresent" value="1" checked> Yes</label><label><input type="radio" name="saaPresent" value="0"> No</label><label><input type="radio" name="saaPresent" value="any"> Any</label></div></div>
+      
+      <div class="filter-group"><label>Both Variants Appearing (Max) <span class="val-display" id="valVariants">0</span></label><input type="range" id="maxBothVariants" min="0" max="5" value="0"></div>
+      
+      <div class="filter-group">
+        <label>Ang Balance</label>
+        <div class="slider-row"><span class="sub-label">Min</span><input type="range" id="angMin" min="-6" max="5" value="-6"><span class="val-display" id="valAngMin">-6</span></div>
+        <div class="slider-row"><span class="sub-label">Max</span><input type="range" id="angMax" min="-6" max="5" value="5"><span class="val-display" id="valAngMax">5</span></div>
+      </div>
+      
+      <div class="filter-group"><label>Samvaad at Pa (Min %) <span class="val-display" id="valPa">0</span></label><input type="range" id="minSamvaadPa" min="0" max="100" value="0"></div>
+      <div class="filter-group"><label>Samvaad at Ma (Min %) <span class="val-display" id="valMa">0</span></label><input type="range" id="minSamvaadMa" min="0" max="100" value="0"></div>
+      <div class="filter-group"><label>Largest Gap (Max Semitones) <span class="val-display" id="valGap">7</span></label><input type="range" id="maxGap" min="1" max="12" value="7"></div>
+
+      <div id="panel2d" style="display: block;">
+        <div class="section-title" style="margin-top:0;">2D Constraints</div>
+        <div class="filter-group"><label>Min Shared Svar (Overall) <span class="val-display" id="valSharedOverall">3</span></label><input type="range" id="minSharedOverall" min="0" max="12" value="3"></div>
+        <div class="filter-group"><label>Min Shared Poorvaang <span class="val-display" id="valSharedPoor">1</span></label><input type="range" id="minSharedPoorvaang" min="0" max="7" value="1"></div>
+        <div class="filter-group"><label>Min Shared Uttaraang <span class="val-display" id="valSharedUtt">1</span></label><input type="range" id="minSharedUttaraang" min="0" max="6" value="1"></div>
+        <div class="filter-group"><label>Max Jaati Difference <span class="val-display" id="valJaatiDiff">4</span></label><input type="range" id="maxJaatiDiff" min="0" max="7" value="4"></div>
+        <div class="filter-group"><label>Max Variant Switches <span class="val-display" id="valVariantDiff">5</span></label><input type="range" id="maxVariantDiff" min="0" max="5" value="5"></div>
+		<div class="filter-group"><label>Max Dropped Svar <span class="val-display" id="valDroppedSvar">0</span></label><input type="range" id="maxDroppedSvar" min="0" max="7" value="0"></div>
+        <div class="filter-group"><label>Max Higher Variant in Avaroh <span class="val-display" id="valHigherVariant">0</span></label><input type="range" id="maxHigherVariant" min="0" max="5" value="0"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel sticky" style="position: sticky; top: 2rem;">
+        
+        <div style="display: flex; gap: 3rem;">
+          <div>
+            <div style="font-weight: bold; color: #fbf5f3;">1D Viable Scales</div>
+            <div class="metric" id="count1d"><span class="loading-text">Fetching...</span></div>
+          </div>
+          <div id="tally2d" style="display: block; border-left: 2px solid #e5e7eb; padding-left: 3rem;">
+            <div style="font-weight: bold; color: #fbf5f3;">2D Viable Raags</div>
+            <div class="metric" id="count2d" style="color: #00e5ff;">-</div> <!-- 4f46e5 -->
+          </div>
+        </div>
+
+        <div style="background: #16161e; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: end;">
+          <div>
+            <label style="margin-bottom: 4px;">Rows to Display</label>
+            <input type="number" id="displayCount" min="1" max="100" value="10" style="margin: 0;">
+          </div>
+          <div>
+            <label style="margin-bottom: 4px;">Selection Mode</label>
+            <select id="displayMode" style="margin: 0;">
+              <option value="random">Random Subset</option>
+              <option value="first">First Valid</option>
+              <option value="last">Last Valid</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-section" id="wrapper1D">
+          <div class="table-header">
+            1D Scales Sample <span class="status-badge" id="badge1D">Showing 0</span>
+          </div>
+          <div class="table-scroll-container">
+            <table>
+              <thead id="head1D"></thead>
+              <tbody id="body1D"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="table-section" id="wrapper2D" style="display: block;">
+          <div class="table-header">
+            2D Raag Sample <span class="status-badge" id="badge2D">Showing 0</span>
+          </div>
+          <div class="table-scroll-container">
+            <table>
+              <thead id="head2D"></thead>
+              <tbody id="body2D"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="calc.js"></script>
+</body>
+</html>

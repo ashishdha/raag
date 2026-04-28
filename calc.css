@@ -1,0 +1,214 @@
+/* MASTER THEME VARIABLES 
+   Tweak colors and font-sizes globally here.
+*/
+:root {
+    /* Color Palette */
+    --bg-deep: #0a0a0c;
+    --bg-panel: #16161e;
+    --text-main: #e2e8f0;
+    --text-dim: #faf3ff;
+    --electric-purple: #ac33ff;
+    --electric-blue: #00e5ff;
+    --accent-glow: rgba(188, 19, 254, 0.2);
+    --border-color: #2d2d3a;
+
+    /* Global Font Scale (Using rem for accessibility) */
+    --fs-root-pct: 75%;    /* Change this to scale EVERYTHING (e.g., 90% or 110%) */
+    --fs-xs: 0.75rem;       /* Smallest notes/badges */
+    --fs-sm: 0.9rem;        /* Labels and UI controls */
+    --fs-base: 1rem;        /* Standard reading text */
+    --fs-lg: 1.1rem;        /* Section headers / Table headers */
+    --fs-xl: 1.5rem;        /* Panel titles */
+    --fs-metric: 1.5rem;    /* Primary Samvaad numbers */
+}
+
+/* Base Styles */
+html {
+    font-size: var(--fs-root-pct);
+}
+
+body { 
+    font-family: system-ui, -apple-system, sans-serif; 
+    padding: 2rem; 
+    background: var(--bg-deep); 
+    color: var(--text-main); 
+    margin: 0; 
+}
+
+h1 { 
+    font-size: 2rem;
+    margin-bottom: 2rem; 
+    color: var(--electric-blue);
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+}
+
+.dashboard { 
+    display: grid; 
+    grid-template-columns: 350px 1fr; 
+    gap: 2rem; 
+    align-items: start;
+}
+
+.panel { 
+    background: var(--bg-panel); 
+    padding: 1.5rem; 
+    border-radius: 8px; 
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); 
+}
+
+/* Typography Implementation */
+.metric { 
+    font-size: var(--fs-metric); 
+    font-weight: bold; 
+    color: var(--electric-purple); 
+    margin: 0.25rem 0; 
+    text-shadow: 0 0 15px var(--accent-glow);
+}
+
+.loading-text { 
+    font-size: var(--fs-lg); 
+    color: var(--text-dim); 
+}
+
+.filter-group { 
+    margin-bottom: 1.25rem; 
+    padding-bottom: 1.25rem; 
+    border-bottom: 1px solid var(--border-color); 
+}
+
+label { 
+    display: flex; 
+    justify-content: space-between; 
+    font-weight: 600; 
+    margin-bottom: 0.5rem; 
+    font-size: var(--fs-sm);
+    color: var(--electric-blue);
+}
+
+.sub-label { 
+    font-weight: normal; 
+    color: var(--text-dim); 
+    font-size: var(--fs-xs); 
+}
+
+.section-title { 
+    font-size: var(--fs-lg); 
+    font-weight: bold; 
+    margin: 1.5rem 0 1rem; 
+    color: var(--text-main); 
+    border-bottom: 2px solid var(--electric-purple); 
+    padding-bottom: 0.5rem;
+}
+
+/* UI Elements */
+.slider-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 0.5rem; 
+}
+
+input[type="range"] { 
+    flex-grow: 1; 
+    accent-color: var(--electric-purple);
+}
+
+.val-display { 
+    font-family: monospace; 
+    font-size: var(--fs-base); 
+    width: 35px; 
+    text-align: right; 
+    background: #000; 
+    color: var(--electric-blue);
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    border: 1px solid var(--border-color);
+}
+
+.radio-group { 
+    display: flex; 
+    gap: 1rem; 
+    font-size: var(--fs-sm); 
+}
+
+select, input[type="number"] { 
+    width: 100%; 
+    padding: 0.5rem; 
+    font-size: var(--fs-base); 
+    border-radius: 4px; 
+    background: #1f1f29;
+    color: white;
+    border: 1px solid var(--border-color); 
+    margin-bottom: 1rem; 
+    box-sizing: border-box;
+}
+
+#panel2d { 
+    background: #000; 
+    padding: 1rem; 
+    border-radius: 6px; 
+    border: 1px solid var(--electric-blue); 
+    margin-top: 1rem; 
+}
+
+/* Table Section */
+.table-section { margin-top: 2rem; }
+
+.table-header { 
+    font-size: var(--fs-lg); 
+    font-weight: 700; 
+    color: var(--electric-blue); 
+    margin-bottom: 0.5rem;
+}
+
+.table-scroll-container { 
+    height: 400px; 
+    overflow-y: auto; 
+    border: 1px solid var(--border-color); 
+    border-radius: 6px; 
+    background: var(--bg-panel); 
+}
+
+table { 
+    width: 100%; 
+    border-collapse: separate; 
+    border-spacing: 0; 
+    font-size: var(--fs-sm); 
+}
+
+th { 
+    background-color: #1f1f2e; 
+    font-weight: 600; 
+    color: var(--electric-blue); 
+    position: sticky; 
+    top: 0; 
+    padding: 0.75rem; 
+    border-bottom: 2px solid var(--border-color); 
+    z-index: 10;
+}
+
+td { 
+    padding: 0.75rem; 
+    border-bottom: 1px solid var(--border-color); 
+}
+
+tr:hover td { 
+    background-color: #1a1a25; 
+}
+
+.svar-text { 
+    font-family: monospace; 
+    letter-spacing: 1px; 
+    color: var(--electric-blue); 
+    font-weight: bold;
+}
+
+.status-badge { 
+    font-size: var(--fs-xs); 
+    padding: 2px 8px; 
+    border-radius: 12px; 
+    background: rgba(188, 19, 254, 0.15); 
+    color: var(--electric-purple); 
+    border: 1px solid var(--electric-purple);
+}
