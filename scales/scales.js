@@ -25,8 +25,8 @@ let sortDir  = 1;
 
 let prefs = {
   notation:       'Hindustaanee Sargam',
-  columnsVisible: 'Standard',
-  filterPreset:   'Easy'
+  columnsVisible: 'Contracted',
+  filterPreset:   'Normal'
 };
 
 // ── LOCALSTORAGE ──────────────────────────────────────────────
@@ -450,34 +450,28 @@ function clearAllFilters() {
 }
 
 const FILTER_PRESETS = {
-  Anarchy: () => {
+  Anarchy: () => {			// 4096 (ALL)
     clearAllFilters();
   },
-  Outliers: () => {
+  Outliers: () => {			// 1872 (No Violations)
     clearAllFilters();
     document.getElementById('violationsVal').value = '0';
+  },  
+  Normal: () => {			// 414 (No BothVariants) !Display name is now 'Plausible'!
+    clearAllFilters();
+    document.getElementById('violationsVal').value   = '0';
+    document.getElementById('bothVariantsOp').value  = 'lte';
+    document.getElementById('bothVariantsVal').value = '0';
   },
-  Normal: () => {
+  Easy: () => {				// 304 (Jaati atleast 5) !Display name is now 'Normal'!
     clearAllFilters();
     document.getElementById('violationsVal').value   = '0';
     document.getElementById('jaatiOp').value         = 'gte';
     document.getElementById('jaatiVal').value        = '5';
     document.getElementById('bothVariantsOp').value  = 'lte';
-    document.getElementById('bothVariantsVal').value = '2';
+    document.getElementById('bothVariantsVal').value = '0';
   },
-  Easy: () => {
-    clearAllFilters();
-    document.getElementById('violationsVal').value   = '0';
-    document.getElementById('jaatiOp').value         = 'gte';
-    document.getElementById('jaatiVal').value        = '5';
-    document.getElementById('bothVariantsOp').value  = 'lte';
-    document.getElementById('bothVariantsVal').value = '1';
-    document.getElementById('consecOp').value        = 'lte';
-    document.getElementById('consecVal').value       = '1';
-    document.getElementById('angMin').value          = '-1';
-    document.getElementById('angMax').value          = '1';
-  },
-  Restrictive: () => {
+  Restrictive: () => {		// 112 (Consecutive Varjit max 1, Ang Balance 0) !Display name is now 'Easy'!
     clearAllFilters();
     document.getElementById('violationsVal').value   = '0';
     document.getElementById('jaatiOp').value         = 'gte';
