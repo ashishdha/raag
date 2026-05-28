@@ -19,6 +19,7 @@
   --input-bg:     #0d0022;
   --header-bg:    #110022;
   --menu-bg:      #140028;
+  --electric-turquoise: #00ffff;
 }
 
 /* ── RESET ── */
@@ -27,7 +28,7 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Courier New', monospace;
+  font-family: 'Calibri', 'Courier New', monospace;
   font-size: 13px;
   min-height: 100vh;
   /* small page margin so table doesn't touch window edges */
@@ -179,8 +180,8 @@ body {
   gap: 3px;
 }
 .control-group label {
-  font-size: 9px;
-  color: var(--purple-glow);
+  font-size: 12px;
+  color: var(--electric-turquoise);
   letter-spacing: 1px;
   text-transform: uppercase;
   white-space: nowrap;
@@ -453,8 +454,21 @@ tr:hover td { background: var(--row-hover); color: #fff; }
   font-size: 13px;
 }
 
+/* ── FOOTER FROM ROOT DIRECTORY STYLES.CSS (need to fix background-color, border-top etc.) ── */
+footer {
+  background: var(--darker-purple);
+  padding: 1.5rem;
+  text-align: center;
+  border-top: 2px solid var(--electric-purple);
+  margin-top: 0rem;
+  color: var(--electric-turquoise);
+  font-size: 0.85rem;
+}
+
+
+
 /* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #0a0015; }
 ::-webkit-scrollbar-thumb { background: var(--purple-dim); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--purple-glow); }
