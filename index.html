@@ -407,7 +407,7 @@
 
   function buildSargamMaps(pitchclasses){
     pitchclasses.forEach(pc => {
-      if (pc.id >= 0 && pc.id <= 11){
+      if (pc.id >= 0 && pc.id <= 12){
         pcSargam.set(pc.id, pc.sargam);
         pcReverse.set(pc.sargam, pc.id);
       }
