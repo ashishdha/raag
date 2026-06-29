@@ -1,1 +1,591 @@
-<meta http-equiv="refresh" content="0; url=raags.html">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raag Database · Hindustaanee Sangeet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+
+  :root{
+    --bg:           #07050c;
+    --bg-panel:     #0e0a18;
+    --bg-row-alt:   #0b0814;
+    --purple:       #a430ff;
+    --purple-bright:#c971ff;
+    --turq:         #00e8d6;
+    --turq-bright:  #6cfff2;
+    --text:         #e9e5f4;
+    --text-dim:     #8b84a3;
+    --border:       rgba(164, 48, 255, 0.22);
+    --border-soft:  rgba(164, 48, 255, 0.12);
+    --row-hover:    rgba(0, 232, 214, 0.06);
+    --radius:       10px;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --display: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--display);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body{
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+    background-image:
+      radial-gradient(ellipse 900px 500px at 12% -10%, rgba(164,48,255,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 95% 0%, rgba(0,232,214,0.10), transparent 60%);
+    background-repeat: no-repeat;
+  }
+
+  a{ color: var(--turq-bright); }
+
+  /* ───────────────────────── HEADER ───────────────────────── */
+
+  header{
+    padding: 28px clamp(16px, 4vw, 48px) 20px;
+    border-bottom: 1px solid var(--border-soft);
+    flex-shrink: 0;
+  }
+
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--turq);
+    margin: 0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px; height:6px;
+    border-radius:50%;
+    background: var(--turq);
+    box-shadow: 0 0 8px 2px var(--turq);
+    flex-shrink:0;
+  }
+
+  .header-row{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    gap: 28px 40px;
+  }
+
+  /* total counter — the page's one big stat */
+  .counter{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    flex-shrink:0;
+  }
+  .counter-number{
+    font-size: clamp(40px, 6vw, 64px);
+    font-weight:700;
+    line-height:1;
+    font-family: var(--display);
+    background: linear-gradient(120deg, var(--turq-bright), var(--purple-bright));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: filter 0.15s ease;
+    min-width: 3ch;
+  }
+  .counter-number.pulse{ filter: drop-shadow(0 0 14px rgba(0,232,214,0.65)); }
+  .counter-label{
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding-bottom: 6px;
+  }
+
+  /* ─────────────────────── CONTROLS ─────────────────────── */
+
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 18px 22px;
+    align-items:flex-end;
+    flex: 1 1 auto;
+  }
+
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    min-width: 200px;
+    flex: 1 1 200px;
+  }
+
+  .field label{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .field-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field-wrap:focus-within{
+    border-color: var(--turq);
+    box-shadow: 0 0 0 3px rgba(0,232,214,0.14);
+  }
+  .field-wrap.present:focus-within{ border-color: var(--turq); box-shadow: 0 0 0 3px rgba(0,232,214,0.14); }
+  .field-wrap.varjit:focus-within{ border-color: var(--purple); box-shadow: 0 0 0 3px rgba(164,48,255,0.16); }
+
+  .field input{
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 17px;
+    letter-spacing: 0.05em;
+    width: 64px;
+    flex-shrink: 0;
+  }
+  .field input::placeholder{ color: var(--text-dim); opacity:0.6; }
+
+  .chips{
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+    min-height: 22px;
+  }
+  .chip{
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight:600;
+    padding: 2px 7px;
+    border-radius: 5px;
+    line-height:1.5;
+  }
+  .chip.shuddha{ background: rgba(0,232,214,0.14); color: var(--turq-bright); border:1px solid rgba(0,232,214,0.35); }
+  .chip.komal{   background: rgba(164,48,255,0.16); color: var(--purple-bright); border:1px solid rgba(164,48,255,0.4); }
+
+  button.reset{
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 11px 18px;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    flex-shrink: 0;
+  }
+  button.reset:hover, button.reset:focus-visible{
+    color: var(--turq-bright);
+    border-color: var(--turq);
+    background: rgba(0,232,214,0.06);
+  }
+  button.reset:focus-visible{ outline: 2px solid var(--turq); outline-offset: 2px; }
+
+  /* ─────────────────────── TABLE ─────────────────────── */
+
+  main{
+    flex: 1 1 auto;
+    padding: 18px clamp(16px, 4vw, 48px) 32px;
+    min-height: 0;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .table-shell{
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    background: var(--bg-panel);
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+
+  thead th{
+    position: sticky;
+    top: 0;
+    background: #120c20;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--turq);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    z-index: 1;
+  }
+
+  thead th.col-id{ width: 64px; }
+  thead th.col-aaroh, thead th.col-avaroh{ min-width: 220px; }
+
+  tbody tr{
+    content-visibility: auto;
+    contain-intrinsic-size: 0 38px;
+    border-bottom: 1px solid rgba(164,48,255,0.08);
+  }
+  tbody tr:hover{ background: var(--row-hover); }
+  tbody tr:nth-child(even){ background: var(--bg-row-alt); }
+  tbody tr:nth-child(even):hover{ background: var(--row-hover); }
+
+  td{
+    padding: 9px 16px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  td.col-id{ color: var(--text-dim); }
+  td.col-name.unnamed{ color: var(--text-dim); font-style: italic; }
+  td.col-aaroh, td.col-avaroh{ letter-spacing: 0.06em; }
+
+  .empty-row td{
+    text-align:center;
+    color: var(--text-dim);
+    font-style: italic;
+    padding: 40px 16px;
+    white-space: normal;
+  }
+
+  .status{
+    padding: 40px 16px;
+    text-align: center;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+  }
+  .status.error{ color: #ff7a9c; }
+
+  footer{
+    text-align:center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 14px 0 22px;
+    flex-shrink:0;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; animation: none !important; }
+  }
+
+  @media (max-width: 640px){
+    .header-row{ flex-direction: column; align-items: stretch; }
+    .controls{ flex-direction: column; }
+    .field{ min-width: 0; }
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Hindustaanee Raag Database</p>
+  <div class="header-row">
+    <div class="counter">
+      <span class="counter-number" id="counter">···</span>
+      <span class="counter-label">raags</span>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label for="present-input">Present svar</label>
+        <div class="field-wrap present">
+          <input id="present-input" type="text" placeholder="e.g. G r" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="chips" id="present-chips"></div>
+      </div>
+
+      <div class="field">
+        <label for="varjit-input">Varjit svar</label>
+        <div class="field-wrap varjit">
+          <input id="varjit-input" type="text" placeholder="e.g. N d" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="chips" id="varjit-chips"></div>
+      </div>
+
+      <button class="reset" id="reset-btn" type="button">Reset</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="table-shell">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-id">ID</th>
+          <th class="col-name">Name</th>
+          <th class="col-aaroh">Aaroh</th>
+          <th class="col-avaroh">Avaroh</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr><td colspan="4" class="status" id="status-row">Loading raags…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer>Case-sensitive sargam: S r R g G M m P d D n N · uppercase = shuddha/teevra, lowercase = komal</footer>
+
+<script>
+(function(){
+
+  const SUPABASE_URL = 'https://cxjfqwnmabyabhjhadjy.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4amZxd25tYWJ5YWJoamhhZGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5Njc2NDUsImV4cCI6MjA3MTU0MzY0NX0.qbI-CU_wgAioBihGx54RXpr4cBryhzIjc4C8iT5YAX0';
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const tableBody     = document.getElementById('table-body');
+  const counterEl      = document.getElementById('counter');
+  const presentInput   = document.getElementById('present-input');
+  const varjitInput     = document.getElementById('varjit-input');
+  const presentChipsEl = document.getElementById('present-chips');
+  const varjitChipsEl   = document.getElementById('varjit-chips');
+  const resetBtn       = document.getElementById('reset-btn');
+
+  let pcSargam   = new Map();   // id (0-11)  -> sargam letter, for display
+  let pcReverse  = new Map();   // sargam letter -> id (0-11), for filter parsing
+  let rows       = [];          // { el, presentMask, varjitMask }
+
+  // normalize any int (including octave-shifted / negative) down to pitch class 0-11
+  function pitchClass(v){
+    return ((v % 12) + 12) % 12;
+  }
+
+  async function fetchAll(table, columns, order){
+    const pageSize = 1000;
+    let all = [];
+    let from = 0;
+    while (true){
+      const { data, error } = await supabase
+        .from(table)
+        .select(columns)
+        .order(order, { ascending: true })
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      all = all.concat(data);
+      if (!data.length || data.length < pageSize) break;
+      from += pageSize;
+    }
+    return all;
+  }
+
+  function buildSargamMaps(pitchclasses){
+    pitchclasses.forEach(pc => {
+      if (pc.id >= 0 && pc.id <= 11){
+        pcSargam.set(pc.id, pc.sargam);
+        pcReverse.set(pc.sargam, pc.id);
+      }
+    });
+  }
+
+  function toSargamString(arr){
+    if (!arr || !arr.length) return '—';
+    return arr.map(v => pcSargam.get(pitchClass(v)) ?? '?').join(' ');
+  }
+
+  function toMasks(arr){
+    let mask = 0;
+    if (arr){
+      for (const v of arr){ mask |= (1 << pitchClass(v)); }
+    }
+    return mask;
+  }
+
+  function renderRows(data){
+    const frag = document.createDocumentFragment();
+    rows = new Array(data.length);
+
+    data.forEach((raag, i) => {
+      const presentMask = toMasks(raag.aaroh) | toMasks(raag.avaroh);
+      const varjitMask = 0xFFF & ~presentMask; // 12-bit complement
+
+      const tr = document.createElement('tr');
+
+      const tdId = document.createElement('td');
+      tdId.className = 'col-id';
+      tdId.textContent = raag.id;
+
+      const tdName = document.createElement('td');
+      tdName.className = 'col-name';
+      if (raag.name){
+        tdName.textContent = raag.name;
+      } else {
+        tdName.textContent = 'Unnamed';
+        tdName.classList.add('unnamed');
+      }
+
+      const tdAaroh = document.createElement('td');
+      tdAaroh.className = 'col-aaroh';
+      tdAaroh.textContent = toSargamString(raag.aaroh);
+
+      const tdAvaroh = document.createElement('td');
+      tdAvaroh.className = 'col-avaroh';
+      tdAvaroh.textContent = toSargamString(raag.avaroh);
+
+      tr.append(tdId, tdName, tdAaroh, tdAvaroh);
+      frag.appendChild(tr);
+
+      rows[i] = { el: tr, presentMask, varjitMask };
+    });
+
+    tableBody.innerHTML = '';
+    tableBody.appendChild(frag);
+  }
+
+  // ── filter parsing ──────────────────────────────────────────
+
+  function parseInputToMask(value){
+    let mask = 0;
+    const chips = [];
+    for (const ch of value){
+      const id = pcReverse.get(ch);
+      if (id === undefined) continue;
+      mask |= (1 << id);
+      chips.push({ ch, komal: ch === ch.toLowerCase() });
+    }
+    return { mask, chips };
+  }
+
+  function renderChips(container, chips){
+    container.innerHTML = '';
+    chips.forEach(c => {
+      const span = document.createElement('span');
+      span.className = 'chip ' + (c.komal ? 'komal' : 'shuddha');
+      span.textContent = c.ch;
+      container.appendChild(span);
+    });
+  }
+
+  let emptyRow = null;
+  function ensureEmptyRow(){
+    if (!emptyRow){
+      emptyRow = document.createElement('tr');
+      emptyRow.className = 'empty-row';
+      const td = document.createElement('td');
+      td.colSpan = 4;
+      td.textContent = 'No raags match these filters.';
+      emptyRow.appendChild(td);
+    }
+    return emptyRow;
+  }
+
+  function applyFilters(){
+    const { mask: presentMask } = parseInputToMask(presentInput.value);
+    const { mask: varjitReq }   = parseInputToMask(varjitInput.value);
+
+    let visible = 0;
+    for (let i = 0; i < rows.length; i++){
+      const r = rows[i];
+      const matchesPresent = (r.presentMask & presentMask) === presentMask;
+      const matchesVarjit  = (r.varjitMask & varjitReq) === varjitReq;
+      const show = matchesPresent && matchesVarjit;
+      r.el.hidden = !show;
+      if (show) visible++;
+    }
+
+    if (visible === 0 && rows.length > 0){
+      tableBody.appendChild(ensureEmptyRow());
+    } else if (emptyRow && emptyRow.parentNode){
+      emptyRow.parentNode.removeChild(emptyRow);
+    }
+
+    updateCounter(visible);
+  }
+
+  let pulseTimer = null;
+  function updateCounter(n){
+    counterEl.textContent = n.toLocaleString();
+    counterEl.classList.remove('pulse');
+    void counterEl.offsetWidth; // restart animation
+    counterEl.classList.add('pulse');
+    clearTimeout(pulseTimer);
+    pulseTimer = setTimeout(() => counterEl.classList.remove('pulse'), 220);
+  }
+
+  presentInput.addEventListener('input', () => {
+    const { chips } = parseInputToMask(presentInput.value);
+    renderChips(presentChipsEl, chips);
+    applyFilters();
+  });
+
+  varjitInput.addEventListener('input', () => {
+    const { chips } = parseInputToMask(varjitInput.value);
+    renderChips(varjitChipsEl, chips);
+    applyFilters();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    presentInput.value = '';
+    varjitInput.value = '';
+    renderChips(presentChipsEl, []);
+    renderChips(varjitChipsEl, []);
+    applyFilters();
+    presentInput.focus();
+  });
+
+  async function init(){
+    try{
+      const [pitchclasses, raags] = await Promise.all([
+        fetchAll('pitchclasses', 'id,sargam', 'id'),
+        fetchAll('raags', 'id,name,aaroh,avaroh', 'id')
+      ]);
+
+      buildSargamMaps(pitchclasses);
+      renderRows(raags);
+      updateCounter(raags.length);
+    } catch (err){
+      tableBody.innerHTML = '';
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4;
+      td.className = 'status error';
+      td.textContent = 'Could not load raags — ' + (err.message || err);
+      tr.appendChild(td);
+      tableBody.appendChild(tr);
+      counterEl.textContent = '—';
+    }
+  }
+
+  init();
+
+})();
+</script>
+
+</body>
+</html>
