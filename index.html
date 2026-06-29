@@ -383,9 +383,9 @@
   let rows       = [];          // { el, presentMask, varjitMask }
 
   // normalize any int (including octave-shifted / negative) down to pitch class 0-11
-  function pitchClass(v){
+  /*function pitchClass(v){
     return ((v % 12) + 12) % 12;
-  }
+  }*/
 
   async function fetchAll(table, columns, order){
     const pageSize = 1000;
@@ -416,13 +416,15 @@
 
   function toSargamString(arr){
     if (!arr || !arr.length) return '—';
-    return arr.map(v => pcSargam.get(pitchClass(v)) ?? '?').join(' ');
+    //return arr.map(v => pcSargam.get(pitchClass(v)) ?? '?').join(' ');
+    return arr.map(v => pcSargam.get(v) ?? '?').join(' ');
   }
 
   function toMasks(arr){
     let mask = 0;
     if (arr){
-      for (const v of arr){ mask |= (1 << pitchClass(v)); }
+      //for (const v of arr){ mask |= (1 << pitchClass(v)); }
+      for (const v of arr){ mask |= (1 << v); }
     }
     return mask;
   }
