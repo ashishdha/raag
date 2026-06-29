@@ -1,0 +1,331 @@
+/* ==========================================================================
+   HINDUSTAANEE RAAG DATABASE
+   index-chatgpt.css
+
+   This stylesheet replaces the inline CSS from index.html.
+
+   --------------------------------------------------------------------------
+   COLOUR PALETTE
+   --------------------------------------------------------------------------
+
+   --bg
+      Entire page background.
+
+   --bg-panel
+      Input boxes, table background.
+
+   --bg-row-alt
+      Alternate table rows.
+
+   --purple
+      Borders, varjit controls.
+
+   --purple-bright
+      Highlights, komal chips.
+
+   --turq
+      Header accent, table headings, present controls.
+
+   --turq-bright
+      Counter gradient, links, shuddha chips.
+
+   --text
+      Main text.
+
+   --text-dim
+      Labels, footer, secondary text.
+
+   --border
+      Visible borders around inputs/buttons.
+
+   --border-soft
+      Subtle separators.
+   ========================================================================== */
+
+:root{
+  --bg:#07050c;
+  --bg-panel:#0e0a18;
+  --bg-row-alt:#0b0814;
+
+  --purple:#a430ff;
+  --purple-bright:#c971ff;
+
+  --turq:#00e8d6;
+  --turq-bright:#6cfff2;
+
+  --text:#e9e5f4;
+  --text-dim:#8b84a3;
+
+  --border:rgba(164,48,255,.22);
+  --border-soft:rgba(164,48,255,.12);
+
+  --row-hover:rgba(0,232,214,.06);
+
+  --radius:10px;
+
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --display:'Space Grotesk',system-ui,sans-serif;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  padding:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--display);
+}
+
+/* --------------------------------------------------------------------------
+   IMPORTANT LAYOUT CHANGE
+
+   Desktop:
+      Fill viewport with a scrolling table.
+
+   Mobile:
+      Disable viewport-height tricks completely and let the page grow
+      naturally. This prevents the table collapsing to zero height.
+
+   -------------------------------------------------------------------------- */
+
+body{
+  min-height:100vh;
+
+  background-image:
+    radial-gradient(ellipse 900px 500px at 12% -10%, rgba(164,48,255,.16), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 95% 0%, rgba(0,232,214,.10), transparent 60%);
+  background-repeat:no-repeat;
+}
+
+/* HEADER */
+
+header{
+  padding:28px clamp(16px,4vw,48px) 20px;
+  border-bottom:1px solid var(--border-soft);
+}
+
+.eyebrow{
+  font:12px var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--turq);
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.eyebrow::before{
+  content:"";
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--turq);
+  box-shadow:0 0 8px 2px var(--turq);
+}
+
+.header-row{
+  display:flex;
+  gap:32px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+}
+
+.counter{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+}
+
+.counter-number{
+  font-size:clamp(40px,6vw,64px);
+  font-weight:700;
+  background:linear-gradient(120deg,var(--turq-bright),var(--purple-bright));
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+.counter-label{
+  font:13px var(--mono);
+  color:var(--text-dim);
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+
+/* CONTROLS */
+
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+  flex:1;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  min-width:220px;
+  flex:1;
+}
+
+.field label{
+  font:11px var(--mono);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+}
+
+.field-wrap{
+  display:flex;
+  align-items:center;
+  background:var(--bg-panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:8px 12px;
+}
+
+/* --------------------------------------------------------------------------
+   INPUTS
+
+   Previous version forced width:64px.
+
+   That caused:
+      • cursor only at far left
+      • placeholder clipped
+      • entered text hidden
+
+   width:100% fixes all of those.
+   -------------------------------------------------------------------------- */
+
+.field input{
+  width:100%;
+  min-width:0;
+  flex:1;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:var(--text);
+  font:17px var(--mono);
+}
+
+.field input::placeholder{
+  color:var(--text-dim);
+}
+
+button.reset{
+  padding:11px 18px;
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  color:var(--text-dim);
+  font:13px var(--mono);
+}
+
+/* TABLE */
+
+main{
+  padding:18px clamp(16px,4vw,48px) 32px;
+}
+
+.table-shell{
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius);
+  background:var(--bg-panel);
+
+  max-height:70vh;
+  overflow:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font:14px var(--mono);
+}
+
+thead th{
+  position:sticky;
+  top:0;
+  background:#120c20;
+  color:var(--turq);
+  padding:12px 16px;
+  white-space:nowrap;
+}
+
+td{
+  padding:9px 16px;
+  white-space:nowrap;
+}
+
+tbody tr:nth-child(even){
+  background:var(--bg-row-alt);
+}
+
+tbody tr:hover{
+  background:var(--row-hover);
+}
+
+footer{
+  text-align:center;
+  padding:18px;
+  color:var(--text-dim);
+  font:11px var(--mono);
+}
+
+/* ==========================================================================
+   RESPONSIVE SECTION
+
+   This entire block only activates on narrow screens.
+
+   Why?
+
+   On phones the header becomes much taller.
+   Instead of squeezing the table to zero height,
+   we remove all viewport-height restrictions and simply
+   allow the whole page to scroll.
+
+   Horizontal scrolling is kept ONLY for the table.
+
+   ========================================================================== */
+
+@media (max-width:640px){
+
+  .header-row{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .controls{
+    flex-direction:column;
+  }
+
+  .field{
+    min-width:0;
+  }
+
+  main{
+    display:block;
+    padding:16px;
+  }
+
+  .table-shell{
+    max-height:none;
+    overflow-x:auto;
+    overflow-y:visible;
+  }
+
+  table{
+    min-width:650px;
+  }
+
+  .counter{
+    margin-bottom:8px;
+  }
+
+  button.reset{
+    width:100%;
+  }
+
+  footer{
+    line-height:1.5;
+  }
+}
