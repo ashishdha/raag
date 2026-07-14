@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to use the Raag Explorer · Naadaalay DB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="raags_advanced.css">
+</head>
+<body>
+
+<div class="guide-page">
+
+  <header class="topbar guide-topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">॰S॰</span>
+      <div class="brand-text">
+        <span class="brand-title">Naadaalay&nbsp;DB</span>
+        <span class="brand-sub">User Guide</span>
+      </div>
+    </div>
+    <nav class="guide-nav">
+      <a href="raags_advanced.html">Open Raag Explorer</a>
+      <a href="glossary.html" target="glossary" class="accent">Glossary ↗</a>
+    </nav>
+  </header>
+
+  <main class="guide-shell">
+
+    <div class="guide-intro">
+      <span class="guide-kicker">How it works</span>
+      <h1>Using the Raag Explorer</h1>
+      <div class="prose">
+        <p>The Raag Explorer catalogs thousands of computationally-generated Hindustaanee <a class="gloss" href="glossary.html#raag" target="glossary">raag</a> candidates — from the handful everybody's heard performed, to obscure note-combinations nobody has named yet. This guide walks through every control on the page, in the order you'll actually reach for them: the Display menu first, then the two big note-based filter boxes, then the simpler filters underneath, then the custom filter builder, and finally the results table itself.</p>
+      </div>
+
+      <div class="callout">
+        <strong>Four steps, if you're in a hurry</strong>
+        <ol class="prose">
+          <li>Open <strong>Display</strong> (top right) and pick a notation system and how many columns to show.</li>
+          <li>Use <strong>Present Svar</strong> / <strong>Varjit Svar</strong> to describe which notes a raag should, or shouldn't, use.</li>
+          <li>Narrow further with Status, Dimension, and Jaati — or just search a name or ID.</li>
+          <li>Need something more specific? Set Filter preset to Custom, add filters, then click <strong>Apply</strong>.</li>
+        </ol>
+      </div>
+    </div>
+
+    <nav class="guide-toc" aria-label="Table of contents">
+      <span class="guide-toc-title">On this page</span>
+      <a href="#display-menu">1. Display menu</a>
+      <a href="#present-varjit">2. Present &amp; Varjit Svar</a>
+      <a href="#other-filters">3. Status, Dimension &amp; Jaati</a>
+      <a href="#custom-filters">4. Custom filters</a>
+      <a href="#table-guide">5. Reading &amp; sorting the table</a>
+    </nav>
+
+    <!-- ══════════════════════ SECTION 1 ══════════════════════ -->
+    <section class="guide-section" id="display-menu">
+      <h2><span class="section-badge">1</span> The Display menu</h2>
+
+      <div class="prose">
+        <p>The <strong>Display</strong> button in the top right of the Raag Explorer opens a small panel with three settings. None of them filter anything — they only change how results look, so feel free to experiment freely.</p>
+      </div>
+
+      <h3>Notation</h3>
+      <div class="prose">
+        <p>Every <a class="gloss" href="glossary.html#raag" target="glossary">raag</a> is built from <a class="gloss" href="glossary.html#svar" target="glossary">svar</a> drawn from twelve possible <a class="gloss" href="glossary.html#svarsthaan" target="glossary">svarsthaan</a> per octave. The Notation dropdown decides how those are written on screen:</p>
+        <ul>
+          <li><strong>Hindustaanee Sargam</strong> — the native notation used throughout <a class="gloss" href="glossary.html#hindustaanee" target="glossary">Hindustaanee</a> classical music: <code>S r R g G M m P d D n N</code>.</li>
+          <li><strong>Integers</strong> — the same twelve positions written as plain numbers, 0 through 11.</li>
+          <li><strong>Jazz Scale Degrees</strong> — the degree numbers used in jazz theory.</li>
+          <li><strong>Western (in C)</strong> — ordinary letter names (C, D, E…), treating Sa as C.</li>
+          <li><strong>Carnatic Sargam</strong> — the equivalent solfège used in <a class="gloss" href="glossary.html#carnatic-sargam" target="glossary">Carnatic</a> (South Indian classical) music.</li>
+        </ul>
+        <p>Switching notation is instant and never changes which raags are shown — only how their <a class="gloss" href="glossary.html#aaroh" target="glossary">aaroh</a> and <a class="gloss" href="glossary.html#avaroh" target="glossary">avaroh</a> are written.</p>
+      </div>
+
+      <h3>Columns</h3>
+      <div class="prose">
+        <p>This dropdown controls how many metrics are shown per raag, from <strong>Minimum</strong> (just the name and the aaroh/avaroh) up to <strong>Maximum</strong> (every metric the database tracks). Each level is cumulative — Standard shows everything Minimum and Contracted show, plus more:</p>
+        <ul>
+          <li><strong>Minimum</strong> — name, aaroh, avaroh.</li>
+          <li><strong>Contracted</strong> — adds the Scientific ID badge, <a class="gloss" href="glossary.html#thaat" target="glossary">thaat</a>, <a class="gloss" href="glossary.html#jaati" target="glossary">jaati</a> in each direction, and a couple of purity/consonance scores.</li>
+          <li><strong>Standard</strong> — adds symmetry, dimension, ang balance, and note-relationship chains.</li>
+          <li><strong>Expanded</strong> — layers in note-level detail: the full svarset, imperfect and detached svarsthaan, and jump sizes between consecutive notes.</li>
+          <li><strong>Maximum</strong> — unlocks everything left: variant-switching counts, <a class="gloss" href="glossary.html#poorvaang" target="glossary">poorvaang</a>/<a class="gloss" href="glossary.html#uttaraang" target="glossary">uttaraang</a> splits for the combined svarset and each direction separately, and the internal Row ID housekeeping column.</li>
+        </ul>
+        <p>The Scientific ID badge appears from Contracted upward; the Row ID number is reserved for Maximum, since it's really only meaningful for database bookkeeping.</p>
+      </div>
+
+      <h3>Filter preset</h3>
+      <div class="prose">
+        <p>A shortcut for common starting points — <strong>All raags</strong>, <strong>Named only</strong>, <strong>Unnamed only</strong>, <strong>1D · Identical</strong>, <strong>2D · Different</strong> — each of which applies immediately. Choosing <strong>Custom</strong> instead reveals the custom filter builder (see Section 4 below); it won't change your results by itself until you've added at least one filter and clicked Apply.</p>
+      </div>
+
+      <div class="mockup no-gloss" aria-hidden="true">
+        <span class="mockup-tag">Preview</span>
+        <div class="menu-panel" style="position:static; box-shadow:none; width:100%; max-width:320px; margin:0 auto;">
+          <div class="menu-panel-title">Display settings</div>
+          <label class="menu-row"><span>Notation</span>
+            <select disabled><option>Hindustaanee Sargam</option></select>
+          </label>
+          <label class="menu-row"><span>Columns</span>
+            <select disabled><option>Standard</option></select>
+          </label>
+          <label class="menu-row"><span>Filter preset</span>
+            <select disabled><option>All raags</option></select>
+          </label>
+          <button class="menu-done" disabled>Done</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ SECTION 2 ══════════════════════ -->
+    <section class="guide-section" id="present-varjit">
+      <h2><span class="section-badge">2</span> Present &amp; Varjit Svar</h2>
+
+      <div class="prose">
+        <p>These two boxes are the heart of the page — they describe a raag by which notes it uses, independent of any specific name or <a class="gloss" href="glossary.html#thaat" target="glossary">thaat</a>. <strong>Present Svar</strong> asks for notes that must appear in the <a class="gloss" href="glossary.html#aaroh" target="glossary">aaroh</a> (ascent) and/or <a class="gloss" href="glossary.html#avaroh" target="glossary">avaroh</a> (descent). <strong>Varjit Svar</strong> — literally the "forbidden" notes — asks for notes that must be missing. Each box has the same pair of toggles, plus a shared Both button.</p>
+      </div>
+
+      <h3>Specific vs. Generic</h3>
+      <div class="prose">
+        <p>In Hindustaanee <a class="gloss" href="glossary.html#sargam" target="glossary">sargam</a>, letter case carries meaning: an uppercase letter is the <a class="gloss" href="glossary.html#shuddha" target="glossary">shuddha</a> (natural) form of a note, and a lowercase letter is the altered form — <a class="gloss" href="glossary.html#komal" target="glossary">komal</a> (flatter) for Re, Ga, Dha and Ni. Ma is the one exception, since it has no komal version: uppercase <code>M</code> is shuddha Ma, and lowercase <code>m</code> is <a class="gloss" href="glossary.html#teevra" target="glossary">teevra</a> (sharp) Ma instead.</p>
+        <ul>
+          <li><strong>Specific</strong> respects this distinction — typing <code>r</code> matches only komal Re, and <code>R</code> matches only shuddha Re.</li>
+          <li><strong>Generic</strong> ignores it — typing either <code>r</code> or <code>R</code> simply means "the Re family," matching a raag whether it uses the komal or the shuddha version. There are seven such families: Sa, Re, Ga, Ma, Pa, Dha, and Ni.</li>
+        </ul>
+      </div>
+
+      <h3>Inclusive vs. Exclusive</h3>
+      <div class="prose">
+        <p>For <strong>Present Svar</strong>: <strong>Inclusive</strong> means <em>at least</em> these notes — everything you type must appear, but other notes are still allowed. <strong>Exclusive</strong> means <em>only</em> these notes — the aaroh (or avaroh) must be built from precisely what you typed, and nothing else.</p>
+        <p>For <strong>Varjit Svar</strong> the same two words describe what's <em>absent</em> instead: <strong>Inclusive</strong> means at least these notes are missing — everything you type must be dropped, though the raag may drop others too. <strong>Exclusive</strong> means only these notes are missing — the raag must be missing exactly what you typed, with every other note present.</p>
+      </div>
+
+      <div class="example-block">
+        <span class="example-label">Example · Present, Generic + Inclusive</span>
+        <p>To find every raag whose ascent uses Ga in some form, without caring about anything else: set Present Svar to <strong>Generic + Inclusive</strong>, turn <strong>Both</strong> off, and type <code>G</code> into the Aaroh box only.</p>
+      </div>
+      <div class="example-block">
+        <span class="example-label">Example · Present, Specific + Exclusive</span>
+        <p>To find raags whose ascent is built from exactly the shuddha, major-scale notes and nothing else: set Present Svar to <strong>Specific + Exclusive</strong> and type <code>S R G M P D N</code> into the Aaroh box.</p>
+      </div>
+      <div class="example-block">
+        <span class="example-label">Example · Varjit, Generic vs. Exclusive</span>
+        <p>Typing <code>D d</code> into Varjit Svar under <strong>Generic + Inclusive</strong> finds raags that drop Dha entirely, in either form — they might drop other notes too. Switching to <strong>Exclusive</strong> with just <code>D</code> typed instead finds raags missing exactly shuddha Dha, and nothing else.</p>
+      </div>
+
+      <h3>Both</h3>
+      <div class="prose">
+        <p>The <strong>Both</strong> button mirrors whatever you type in the Aaroh box into the Avaroh box, and vice versa — handy when your criteria should apply symmetrically in both directions. Turn it off to set the ascent and descent independently. Present Svar starts <strong>Exclusive + Specific</strong> with Both on; Varjit Svar starts <strong>Inclusive + Generic</strong> with Both on — reasonable defaults for most searches, but every combination is available.</p>
+      </div>
+
+      <div class="mockup no-gloss" aria-hidden="true">
+        <span class="mockup-tag">Preview</span>
+        <div class="svar-row">
+          <div class="svar-panel present">
+            <div class="svar-panel-head">
+              <span class="svar-panel-title present">Present Svar</span>
+              <div class="toggle-row">
+                <div class="mode-toggle present">
+                  <input type="radio" name="mockup-present-inex" id="mockup-pi-inc" disabled>
+                  <label for="mockup-pi-inc">Inclusive</label>
+                  <input type="radio" name="mockup-present-inex" id="mockup-pi-exc" checked disabled>
+                  <label for="mockup-pi-exc">Exclusive</label>
+                </div>
+                <div class="mode-toggle present">
+                  <input type="radio" name="mockup-present-mode" id="mockup-pm-spec" checked disabled>
+                  <label for="mockup-pm-spec">Specific</label>
+                  <input type="radio" name="mockup-present-mode" id="mockup-pm-gen" disabled>
+                  <label for="mockup-pm-gen">Generic</label>
+                </div>
+              </div>
+            </div>
+            <div class="svar-panel-boxes">
+              <div class="field">
+                <label>Aaroh</label>
+                <div class="field-wrap present"><input type="text" value="G r" disabled></div>
+                <div class="chips"><span class="chip shuddha">G</span><span class="chip komal">r</span></div>
+              </div>
+              <div class="both-toggle-wrap">
+                <button type="button" class="both-toggle present" aria-pressed="true" disabled>Both</button>
+              </div>
+              <div class="field">
+                <label>Avaroh</label>
+                <div class="field-wrap present"><input type="text" value="G r" disabled></div>
+                <div class="chips"><span class="chip shuddha">G</span><span class="chip komal">r</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="svar-panel varjit">
+            <div class="svar-panel-head">
+              <span class="svar-panel-title varjit">Varjit Svar</span>
+              <div class="toggle-row">
+                <div class="mode-toggle varjit">
+                  <input type="radio" name="mockup-varjit-inex" id="mockup-vi-inc" checked disabled>
+                  <label for="mockup-vi-inc">Inclusive</label>
+                  <input type="radio" name="mockup-varjit-inex" id="mockup-vi-exc" disabled>
+                  <label for="mockup-vi-exc">Exclusive</label>
+                </div>
+                <div class="mode-toggle varjit">
+                  <input type="radio" name="mockup-varjit-mode" id="mockup-vm-spec" disabled>
+                  <label for="mockup-vm-spec">Specific</label>
+                  <input type="radio" name="mockup-varjit-mode" id="mockup-vm-gen" checked disabled>
+                  <label for="mockup-vm-gen">Generic</label>
+                </div>
+              </div>
+            </div>
+            <div class="svar-panel-boxes">
+              <div class="field">
+                <label>Aaroh</label>
+                <div class="field-wrap varjit"><input type="text" value="D d" disabled></div>
+                <div class="chips"><span class="chip shuddha">D</span><span class="chip komal">d</span></div>
+              </div>
+              <div class="both-toggle-wrap">
+                <button type="button" class="both-toggle varjit" aria-pressed="true" disabled>Both</button>
+              </div>
+              <div class="field">
+                <label>Avaroh</label>
+                <div class="field-wrap varjit"><input type="text" value="D d" disabled></div>
+                <div class="chips"><span class="chip shuddha">D</span><span class="chip komal">d</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ SECTION 3 ══════════════════════ -->
+    <section class="guide-section" id="other-filters">
+      <h2><span class="section-badge">3</span> Status, Dimension &amp; Jaati</h2>
+
+      <div class="prose">
+        <p>Below the two svar boxes sit a handful of simpler filters.</p>
+      </div>
+
+      <h3>Status</h3>
+      <div class="prose">
+        <p><strong>Named / Unnamed / All.</strong> This database includes every scale combination that survives the validity rules — not just raags with an established identity — so many rows are still waiting to be named. Status lets you show only the ones that already have a name, only the unnamed candidates, or everything.</p>
+      </div>
+
+      <h3>Dimension</h3>
+      <div class="prose">
+        <p>Describes how a raag's aaroh and avaroh relate to each other:</p>
+        <ul>
+          <li><strong>Identical</strong> — the same notes, same shape, in both directions.</li>
+          <li><strong>Different</strong> — a different note-set ascending versus descending.</li>
+          <li><strong>Vakra</strong> — zigzag movement, where notes appear out of strict order.</li>
+          <li><strong>JoD</strong> — a raag built by joining two distinct fragments.</li>
+          <li><strong>Raagish</strong> — a borderline case: more raag-like than a plain scale, but not fully confirmed as a raag.</li>
+        </ul>
+        <p>Most entries in the database today fall under Identical or Different; the remaining categories are reserved as the classification work continues.</p>
+      </div>
+
+      <h3>Aaroh Jaati / Avaroh Jaati</h3>
+      <div class="prose">
+        <p><a class="gloss" href="glossary.html#jaati" target="glossary">Jaati</a> counts how many of the seven svar families appear in a given direction. The classical terms for the common cases are <a class="gloss" href="glossary.html#audav" target="glossary">Audav</a> (five notes), <a class="gloss" href="glossary.html#shadav" target="glossary">Shadav</a> (six notes), and <a class="gloss" href="glossary.html#sampoorna" target="glossary">Sampoorna</a> (all seven — complete); rarer raags can use as few as three or four. Pick Min, Exactly, or Max, then a note count, to filter on either direction independently.</p>
+      </div>
+
+      <h3>Name / ID</h3>
+      <div class="prose">
+        <p>A plain text box — type any part of a raag's name, or its row number, to jump straight to it.</p>
+      </div>
+
+      <div class="mockup no-gloss" aria-hidden="true">
+        <span class="mockup-tag">Preview</span>
+        <div class="quick-row">
+          <div class="field">
+            <label>Status</label>
+            <select disabled><option>Named</option></select>
+          </div>
+          <div class="field">
+            <label>Dimension</label>
+            <select disabled><option>1 · Identical</option></select>
+          </div>
+          <div class="field">
+            <label>Aaroh Jaati</label>
+            <div class="dim-pair">
+              <select disabled><option>Exactly</option></select>
+              <select disabled><option>5</option></select>
+            </div>
+          </div>
+          <div class="field grow">
+            <label>Name / ID</label>
+            <div class="field-wrap"><input type="text" value="kalyan" disabled></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ SECTION 4 ══════════════════════ -->
+    <section class="guide-section" id="custom-filters">
+      <h2><span class="section-badge">4</span> Custom filters</h2>
+
+      <div class="prose">
+        <p>For anything the controls above don't cover, switch <strong>Filter preset</strong> (in the Display menu) to <strong>Custom</strong>. This reveals a builder that can filter on almost any column the database tracks — over fifty of them, from Symmetry Score to <a class="gloss" href="glossary.html#samvaad" target="glossary">Samvaad</a> at Pa to which <a class="gloss" href="glossary.html#moorchhanaa" target="glossary">Moorchhanaa</a> family or <a class="gloss" href="glossary.html#thaat" target="glossary">Thaat</a> a raag belongs to.</p>
+      </div>
+
+      <h3>Adding a filter</h3>
+      <div class="prose">
+        <p>Click <strong>+ Add filter</strong> to add a row. Each row has three parts:</p>
+        <ul>
+          <li><strong>Column</strong> — grouped the same way as the Columns menu (Minimum, Contracted, Standard, Expanded, Maximum), so if you can't find what you're after, it's probably filed under a later group. You don't need to raise the Columns setting to filter on something — filtering and display are independent. If you also want to <em>see</em> the column's values in the table, raise Columns to match separately.</li>
+          <li><strong>Comparison</strong> — the choices adapt to the column's type. Number columns offer Min / Max / Exactly / Less than / More than. Text columns offer Contains / Starts with / Exactly. Note-array columns (like Svarset or Varjit Svar) offer Contains / Excludes, read the same way as the sargam letters in Present/Varjit Svar above. A handful of columns — Thaat, <a class="gloss" href="glossary.html#ang" target="glossary">Ang</a>, <a class="gloss" href="glossary.html#samay" target="glossary">Samay</a>, Creator, Popularity, and similar fixed categories — skip the comparison entirely and just offer a dropdown of exact values.</li>
+          <li><strong>Value</strong> — the input itself, shaped to match whatever comparison is selected.</li>
+        </ul>
+        <p>Click the <strong>×</strong> to remove a row. Stack as many filters as you like — a raag has to satisfy every single one, together with anything set in Present/Varjit Svar and the quick filters above, before it appears. Nothing takes effect until you click <strong>Apply</strong>.</p>
+      </div>
+
+      <div class="mockup no-gloss" aria-hidden="true">
+        <span class="mockup-tag">Preview</span>
+        <div class="custom-block" style="border-style:solid;">
+          <div class="custom-block-head">
+            <span class="custom-block-title">Custom filters</span>
+            <button type="button" class="add-filter-btn" disabled>+ Add filter</button>
+          </div>
+          <div class="active-filters">
+            <div class="filter-instance">
+              <select class="filter-col-select" disabled><option>Symmetry Score</option></select>
+              <select disabled><option>Min (≥)</option></select>
+              <input type="number" value="70" disabled>
+              <button type="button" class="filter-remove" disabled>×</button>
+            </div>
+            <div class="filter-instance">
+              <select class="filter-col-select" disabled><option>Thaat</option></select>
+              <select disabled><option>Kaafee – Bhairavee</option></select>
+              <button type="button" class="filter-remove" disabled>×</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ SECTION 5 ══════════════════════ -->
+    <section class="guide-section" id="table-guide">
+      <h2><span class="section-badge">5</span> Reading &amp; sorting the table</h2>
+
+      <div class="prose">
+        <p>The table shows one row per raag, with columns matching whichever visibility level is selected in Display.</p>
+      </div>
+
+      <h3>The Scientific ID</h3>
+      <div class="prose">
+        <p>From Contracted upward, the first column is a compact, color-coded badge rather than plain text — a fingerprint for the row. It's built from four segments: the aaroh's underlying scale code (blue, four digits), the avaroh's underlying scale code (purple, four digits), the <a class="gloss" href="glossary.html#dimension" target="glossary">dimension</a> digit (grey), and an instance number (green) that only changes if two different raags ever end up sharing the exact same aaroh, avaroh, and dimension.</p>
+      </div>
+
+      <h3>Sorting</h3>
+      <div class="prose">
+        <p>Click any column header to sort the whole table by that column, ascending. Click it again to reverse to descending. A small triangle marks whichever column is currently driving the sort order. Sorting only reorders the rows you can already see — it never hides or reveals anything; that's what the filters above are for.</p>
+      </div>
+
+      <h3>Scrolling</h3>
+      <div class="prose">
+        <p>At higher visibility levels there are far more columns than fit on screen, so the table scrolls sideways as well as up and down — the column headers stay pinned in place while you scroll down, and a highlighted scrollbar along the bottom lets you pan across. The footer below the table always shows how many raags are currently showing, out of the total.</p>
+      </div>
+
+      <div class="mockup no-gloss" aria-hidden="true">
+        <span class="mockup-tag">Preview</span>
+        <div style="overflow:auto; border:1px solid rgba(255,255,255,0.09); border-radius:10px;">
+          <table style="width:100%;">
+            <thead>
+              <tr>
+                <th data-sort="desc"><span class="th-label">Scientific ID<span class="th-arrow"></span></span></th>
+                <th><span class="th-label">Name<span class="th-arrow"></span></span></th>
+                <th><span class="th-label">Symmetry Score<span class="th-arrow"></span></span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="sci-badge">
+                    <span class="sci-seg sci-aaroh">2741</span><span class="sci-seg sci-avaroh">2741</span><span class="sci-seg sci-dim">1</span><span class="sci-seg sci-inst">1</span>
+                  </div>
+                </td>
+                <td>Bilaaval</td>
+                <td>62</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="sci-badge">
+                    <span class="sci-seg sci-aaroh">0341</span><span class="sci-seg sci-avaroh">2645</span><span class="sci-seg sci-dim">2</span><span class="sci-seg sci-inst">1</span>
+                  </div>
+                </td>
+                <td class="col-unnamed">Unnamed</td>
+                <td>48</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer-bar guide-footer">
+    <span class="eyebrow">Naadaalay DB · User Guide</span>
+  </footer>
+
+</div>
+
+<script src="raags_guide.js"></script>
+</body>
+</html>

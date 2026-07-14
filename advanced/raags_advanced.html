@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raag Explorer · Naadaalay DB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="raags_advanced.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══════════════════════ TOP BAR ══════════════════════ -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">॰S॰</span>
+      <div class="brand-text">
+        <span class="brand-title">Naadaalay&nbsp;DB</span>
+        <span class="brand-sub">Raag Explorer</span>
+      </div>
+    </div>
+
+    <div class="topbar-stat">
+      <span class="stat-number" id="counter">···</span>
+      <span class="stat-label">raags</span>
+    </div>
+
+    <div class="menu-wrap">
+      <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false">
+        <span class="menu-btn-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        Display
+      </button>
+
+      <div class="menu-panel" id="menu-panel" hidden>
+        <div class="menu-panel-title">Display settings</div>
+
+        <label class="menu-row">
+          <span>Notation</span>
+          <select id="notation-select">
+            <option value="sargam" selected>Hindustaanee Sargam</option>
+            <option value="integers">Integers</option>
+            <option value="jazz">Jazz Scale Degrees</option>
+            <option value="western">Western (in C)</option>
+            <option value="carnatic">Carnatic Sargam</option>
+          </select>
+        </label>
+
+        <label class="menu-row">
+          <span>Columns</span>
+          <select id="columns-select">
+            <option value="minimum">Minimum</option>
+            <option value="contracted">Contracted</option>
+            <option value="standard" selected>Standard</option>
+            <option value="expanded">Expanded</option>
+            <option value="maximum">Maximum</option>
+          </select>
+        </label>
+
+        <label class="menu-row">
+          <span>Filter preset</span>
+          <select id="preset-select">
+            <option value="all" selected>All raags</option>
+            <option value="named">Named only</option>
+            <option value="unnamed">Unnamed only</option>
+            <option value="dim1">1D · Identical</option>
+            <option value="dim2">2D · Different</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </label>
+
+        <button class="menu-done" id="menu-done" type="button">Done</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════ FILTER BAR ══════════════════════ -->
+  <section class="filter-bar">
+
+    <div class="svar-row">
+      <div class="svar-panel present">
+        <div class="svar-panel-head">
+          <span class="svar-panel-title present">Present Svar</span>
+          <div class="toggle-row">
+            <div class="mode-toggle present">
+              <input type="radio" name="present-inex" id="present-inex-inclusive" value="inclusive">
+              <label for="present-inex-inclusive">Inclusive</label>
+              <input type="radio" name="present-inex" id="present-inex-exclusive" value="exclusive" checked>
+              <label for="present-inex-exclusive">Exclusive</label>
+            </div>
+            <div class="mode-toggle present">
+              <input type="radio" name="present-mode" id="present-mode-specific" value="specific" checked>
+              <label for="present-mode-specific">Specific</label>
+              <input type="radio" name="present-mode" id="present-mode-generic" value="generic">
+              <label for="present-mode-generic">Generic</label>
+            </div>
+          </div>
+        </div>
+        <div class="svar-panel-boxes">
+          <div class="field">
+            <label for="present-aaroh-input">Aaroh</label>
+            <div class="field-wrap present">
+              <input id="present-aaroh-input" type="text" placeholder="e.g. G r" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="chips" id="present-aaroh-chips"></div>
+          </div>
+          <div class="both-toggle-wrap">
+            <button type="button" class="both-toggle present" id="present-both-toggle" aria-pressed="true" title="Mirror input to both Aaroh and Avaroh">Both</button>
+          </div>
+          <div class="field">
+            <label for="present-avaroh-input">Avaroh</label>
+            <div class="field-wrap present">
+              <input id="present-avaroh-input" type="text" placeholder="e.g. G r" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="chips" id="present-avaroh-chips"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="svar-panel varjit">
+        <div class="svar-panel-head">
+          <span class="svar-panel-title varjit">Varjit Svar</span>
+          <div class="toggle-row">
+            <div class="mode-toggle varjit">
+              <input type="radio" name="varjit-inex" id="varjit-inex-inclusive" value="inclusive" checked>
+              <label for="varjit-inex-inclusive">Inclusive</label>
+              <input type="radio" name="varjit-inex" id="varjit-inex-exclusive" value="exclusive">
+              <label for="varjit-inex-exclusive">Exclusive</label>
+            </div>
+            <div class="mode-toggle varjit">
+              <input type="radio" name="varjit-mode" id="varjit-mode-specific" value="specific">
+              <label for="varjit-mode-specific">Specific</label>
+              <input type="radio" name="varjit-mode" id="varjit-mode-generic" value="generic" checked>
+              <label for="varjit-mode-generic">Generic</label>
+            </div>
+          </div>
+        </div>
+        <div class="svar-panel-boxes">
+          <div class="field">
+            <label for="varjit-aaroh-input">Aaroh</label>
+            <div class="field-wrap varjit">
+              <input id="varjit-aaroh-input" type="text" placeholder="e.g. N d" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="chips" id="varjit-aaroh-chips"></div>
+          </div>
+          <div class="both-toggle-wrap">
+            <button type="button" class="both-toggle varjit" id="varjit-both-toggle" aria-pressed="true" title="Mirror input to both Aaroh and Avaroh">Both</button>
+          </div>
+          <div class="field">
+            <label for="varjit-avaroh-input">Avaroh</label>
+            <div class="field-wrap varjit">
+              <input id="varjit-avaroh-input" type="text" placeholder="e.g. N d" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="chips" id="varjit-avaroh-chips"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-row">
+      <div class="field">
+        <label for="status-filter">Status</label>
+        <select id="status-filter">
+          <option value="all" selected>All</option>
+          <option value="named">Named</option>
+          <option value="unnamed">Unnamed</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="dimension-filter">Dimension</label>
+        <select id="dimension-filter">
+          <option value="any" selected>Any</option>
+          <option value="1">1 · Identical</option>
+          <option value="2">2 · Different</option>
+          <option value="3">3 · Vakra</option>
+          <option value="4">4 · JoD</option>
+          <option value="5">5 · Raagish</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="aaroh-jaati-compare">Aaroh Jaati</label>
+        <div class="dim-pair">
+          <select id="aaroh-jaati-compare">
+            <option value="min">Min</option>
+            <option value="exactly" selected>Exactly</option>
+            <option value="max">Max</option>
+          </select>
+          <select id="aaroh-jaati-value">
+            <option value="any" selected>Any</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="avaroh-jaati-compare">Avaroh Jaati</label>
+        <div class="dim-pair">
+          <select id="avaroh-jaati-compare">
+            <option value="min">Min</option>
+            <option value="exactly" selected>Exactly</option>
+            <option value="max">Max</option>
+          </select>
+          <select id="avaroh-jaati-value">
+            <option value="any" selected>Any</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field grow">
+        <label for="search-input">Name / ID</label>
+        <div class="field-wrap">
+          <input id="search-input" type="text" placeholder="search name or id" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    </div>
+
+    <div class="custom-block" id="custom-block" hidden>
+      <div class="custom-block-head">
+        <span class="custom-block-title">Custom filters</span>
+        <button type="button" class="add-filter-btn" id="add-filter-btn">+ Add filter</button>
+      </div>
+      <div class="active-filters" id="active-filters"></div>
+      <span class="no-filters-note" id="no-filters-note">No custom filters added yet.</span>
+    </div>
+
+    <div class="filter-actions">
+      <span class="filter-hint" id="filter-hint">Adjust filters, then Apply.</span>
+      <button class="btn-reset" id="reset-btn" type="button">Reset</button>
+      <button class="btn-apply" id="apply-btn" type="button">Apply</button>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════ TABLE ══════════════════════ -->
+  <main class="table-main">
+    <div class="table-shell" id="table-shell">
+      <table id="raag-table">
+        <thead>
+          <tr id="table-head-row"><th>Loading columns…</th></tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td class="status-cell" id="status-row">Loading raags…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="footer-bar">
+    <span class="eyebrow" id="showing-count">showing 0 of 0 raags</span>
+  </footer>
+
+</div>
+
+<script src="raags_advanced.js"></script>
+</body>
+</html>
