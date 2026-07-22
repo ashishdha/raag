@@ -102,7 +102,7 @@
     { key: 'avaroh_number',              label: 'Avaroh #',               preset: 'maximum',    type: 'int',          filterable: true },
     { key: 'ang_id',                     label: 'Ang',                    preset: 'maximum',    type: 'fk', lookup: 'ang', filterable: true },
     { key: 'samay_id',                   label: 'Samay',                  preset: 'maximum',    type: 'fk', lookup: 'samay', filterable: true },
-    { key: 'taanpuraa_tuning',           label: 'Taanpuraa Tuning',       preset: 'maximum',    type: 'svar_specific', filterable: true },
+    { key: 'taanpuraa_tuning_id',        label: 'Taanpuraa Tuning',       preset: 'maximum',    type: 'svar_specific', filterable: true },
     { key: 'creator_id',                 label: 'Creator',                preset: 'maximum',    type: 'fk', lookup: 'creator', filterable: true },
     { key: 'popularity_id',              label: 'Popularity',             preset: 'maximum',    type: 'fk', lookup: 'popularity', filterable: true },
     { key: 'carnatic_name',              label: 'Carnatic Name',          preset: 'maximum',    type: 'text',         filterable: true },
