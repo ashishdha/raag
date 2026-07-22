@@ -1,0 +1,36 @@
+window
+
+databaseClient
+
+tables
+    pitchclasses
+    octaves
+    symbols
+    tetrachords
+    thaats
+    ...
+
+notationMap
+reverseNotationMap
+
+notationMode
+notationColumns
+saaMidiNote
+lowestMusicalInt
+highestMusicalInt
+
+musicLoaded
+raagMetadataLoaded
+
+fetchTable()
+cacheTable()
+loadMusicData()
+loadRaagMetadata()
+getCachedTableData()
+
+int2notation()
+notation2int()
+rebuildNotationMap()
+
+
+PM 11:27 12-07-2026

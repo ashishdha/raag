@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading raagTableRenderer.js — a JS walkthrough for a ChucK programmer</title>
+<style>
+  :root{
+    --bg:           #07050c;
+    --bg-panel:     #0e0a18;
+    --bg-input:     #120c20;
+    --purple:       #a430ff;
+    --purple-bright:#c971ff;
+    --turq:         #00e8d6;
+    --turq-bright:  #6cfff2;
+    --green:        #00ff66;
+    --red:          #ff5c7a;
+    --text:         #f0f0ff; /* e9e5f4*/
+    --text-dim:     #aba4f3; /* 8b84a3*/
+    --border:       rgba(164, 48, 255, 0.22);
+    --border-soft:  rgba(164, 48, 255, 0.12);
+    --radius:       10px;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+    --display: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior: auto; } *{ transition:none !important; animation:none !important; } }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--display);
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(ellipse 900px 500px at 10% -10%, rgba(164,48,255,0.14), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(0,232,214,0.08), transparent 60%);
+    background-repeat: no-repeat;
+  }
+
+  a{ color: var(--turq-bright); }
+
+  /* ── TOC toggle (mobile) ───────────────────────────────── */
+  .toc-toggle{
+    display:none;
+    position: fixed;
+    top: 12px; left: 12px;
+    z-index: 50;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+
+  /* ── sidebar TOC ────────────────────────────────────────── */
+  nav.toc{
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 270px;
+    overflow-y: auto;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border-soft);
+    padding: 26px 18px 40px;
+  }
+  .toc-title{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--turq);
+    margin: 0 0 18px;
+  }
+  .toc-group{
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 20px 0 8px;
+  }
+  .toc-group:first-of-type{ margin-top: 0; }
+  a.toc-link{
+    display:block;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    text-decoration:none;
+    padding: 5px 8px;
+    border-radius: 7px;
+    border-left: 2px solid transparent;
+    line-height: 1.4;
+  }
+  a.toc-link:hover{ color: var(--text); background: rgba(164,48,255,0.06); }
+  a.toc-link.active{
+    color: var(--turq-bright);
+    border-left-color: var(--turq);
+    background: rgba(0,232,214,0.06);
+  }
+
+  /* ── main content ───────────────────────────────────────── */
+  main{
+    margin-left: 270px;
+    max-width: 760px;
+    padding: 48px 32px 120px;
+  }
+
+  header.page-head{ margin-bottom: 40px; }
+  header.page-head .eyebrow{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--turq);
+    margin: 0 0 14px;
+  }
+  header.page-head h1{
+    font-size: clamp(26px, 4vw, 36px);
+    line-height: 1.15;
+    margin: 0 0 16px;
+    background: linear-gradient(120deg, var(--turq-bright), var(--purple-bright));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header.page-head p{ color: var(--text-dim); font-size: 15.5px; line-height: 1.7; }
+
+  section{
+    margin: 56px 0;
+    padding-top: 8px;
+    scroll-margin-top: 20px;
+  }
+
+  h2{
+    font-size: 21px;
+    display:flex;
+    align-items:baseline;
+    gap: 8px;
+    margin: 0 0 14px;
+    color: var(--text);
+  }
+  h2 .anchor{
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    text-decoration: none;
+    opacity: 0.5;
+  }
+  h2 .anchor:hover{ opacity: 1; color: var(--turq); }
+
+  p{ line-height: 1.75; font-size: 15.5px; margin: 0 0 14px; }
+  ul, ol.exercises{ line-height: 1.75; font-size: 15.5px; padding-left: 22px; }
+  li{ margin-bottom: 8px; }
+
+  code{
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--bg-input);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--turq-bright);
+  }
+
+  pre{
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 0 0 16px;
+  }
+  pre code{
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  aside{
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin: 0 0 16px;
+    font-size: 14.5px;
+    line-height: 1.7;
+    border: 1px solid var(--border-soft);
+    border-left-width: 3px;
+  }
+  aside p:last-child{ margin-bottom: 0; }
+  aside .aside-label{
+    display:block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  aside.chuck{ border-left-color: var(--turq); background: rgba(0,232,214,0.05); }
+  aside.chuck .aside-label{ color: var(--turq); }
+  aside.gotcha{ border-left-color: var(--red); background: rgba(255,92,122,0.05); }
+  aside.gotcha .aside-label{ color: var(--red); }
+  aside.try{ border-left-color: var(--green); background: rgba(0,255,102,0.05); }
+  aside.try .aside-label{ color: var(--green); }
+
+  .back-link{
+    display:inline-block;
+    margin-top: 4px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--border);
+  }
+  .back-link:hover{ color: var(--turq-bright); }
+
+  details.source-block summary{
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--turq-bright);
+    padding: 10px 14px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  details.source-block[open] summary{ border-radius: var(--radius) var(--radius) 0 0; }
+
+  ol.code-lines{
+    margin: 0;
+    padding: 12px 0 12px 52px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  ol.code-lines li{
+    white-space: pre;
+    color: var(--text-dim);
+    margin: 0;
+  }
+  ol.code-lines li::marker{ color: #45395c; font-size: 11px; }
+  ol.code-lines li > span{ color: var(--text); }
+
+  hr.rule{ border:none; border-top: 1px solid var(--border-soft); margin: 48px 0; }
+
+  footer{
+    margin-left: 270px;
+    padding: 20px 32px 60px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  @media (max-width: 900px){
+    .toc-toggle{ display:block; }
+    nav.toc{
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+      z-index: 40;
+      width: 82vw;
+      max-width: 320px;
+      padding-top: 64px;
+    }
+    nav.toc.open{ transform: translateX(0); box-shadow: 20px 0 40px rgba(0,0,0,0.5); }
+    main, footer{ margin-left: 0; padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="toc-toggle" id="tocToggle" aria-expanded="false" aria-controls="toc">☰ Contents</button>
+
+<nav class="toc" id="toc">
+  <p class="toc-title">Contents</p>
+
+  <p class="toc-group">Orientation</p>
+  <a class="toc-link" href="#overview">The big picture</a>
+  <a class="toc-link" href="#full-source">Full source (reference)</a>
+
+  <p class="toc-group">Language fundamentals</p>
+  <a class="toc-link" href="#jsdoc">Doc comments</a>
+  <a class="toc-link" href="#function-signature">Function &amp; parameters</a>
+  <a class="toc-link" href="#sets">The Set</a>
+  <a class="toc-link" href="#scope-closures">Scope &amp; closures</a>
+  <a class="toc-link" href="#arrow-functions">Arrow functions</a>
+  <a class="toc-link" href="#ternary">Ternary operator</a>
+
+  <p class="toc-group">Working with data</p>
+  <a class="toc-link" href="#array-methods">every / map / join</a>
+  <a class="toc-link" href="#typeof">typeof &amp; dynamic typing</a>
+  <a class="toc-link" href="#isarray">Array.isArray</a>
+  <a class="toc-link" href="#recursion">Recursion</a>
+  <a class="toc-link" href="#nullish">null vs undefined</a>
+  <a class="toc-link" href="#strings">Building strings</a>
+
+  <p class="toc-group">Talking to the page (DOM)</p>
+  <a class="toc-link" href="#dom-basics">createElement &amp; friends</a>
+  <a class="toc-link" href="#bracket-notation">Dynamic property access</a>
+  <a class="toc-link" href="#object-keys">Object.keys &amp; order</a>
+  <a class="toc-link" href="#semantic-inputs">input, output, readonly</a>
+  <a class="toc-link" href="#events">Events</a>
+
+  <p class="toc-group">Putting it together</p>
+  <a class="toc-link" href="#classes">Your class, revisited</a>
+  <a class="toc-link" href="#optional-callback">The optional onEdit hook</a>
+  <a class="toc-link" href="#render-cycle">The render cycle</a>
+  <a class="toc-link" href="#next-steps">Exercises &amp; further reading</a>
+</nav>
+
+<main>
+
+<header class="page-head">
+  <p class="eyebrow">Naadaalay DB · JS Companion</p>
+  <h1>Reading raagTableRenderer.js</h1>
+  <p>
+    This page walks through every construct used in <code>raagTableRenderer.js</code>, one concept
+    at a time. You already know ChucK, so wherever JavaScript does something with a genuinely
+    different mindset — dynamic typing, closures, the DOM, events — this page calls it out
+    explicitly and compares it to the ChucK way of doing the same job. Where JS is basically
+    "the same idea, different keyword," it says so quickly and moves on.
+  </p>
+  <p>
+    Use the contents on the left as a map — each entry jumps straight to that concept, and each
+    section ends with a link back up. There's no need to read top to bottom in one sitting;
+    treat it like a reference you dip into while rereading the actual code.
+  </p>
+</header>
+
+<section id="overview">
+  <h2><a class="anchor" href="#overview">#</a> The big picture</h2>
+  <p>
+    <code>renderRaagTable()</code> does one job: given a <code>currentRaag</code> object, draw a
+    table with one row per property. Column 1 is the property's name, column 2 is a
+    human-readable, sometimes-editable box, column 3 is the raw stored value.
+  </p>
+  <p>
+    Structurally, the file is one outer function containing four small helper functions and a
+    loop. Nothing in it runs on its own — like a ChucK <code>fun</code>, it only does anything
+    when something else calls it. The first call happens whenever your own code decides the
+    table needs to exist or refresh (e.g. right after <code>currentRaag.set(...)</code>
+    finishes). After that, the function calls <em>itself</em> again each time the person edits a
+    field — that's covered in full in <a href="#render-cycle">The render cycle</a> once all the
+    pieces are on the table.
+  </p>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      There's no shred here, no <code>now =&gt; now</code>, no audio-rate loop. A JS function
+      that touches the page runs synchronously from top to bottom exactly once per call, then
+      hands control back to the browser — much like calling one of your ChucK class's
+      <code>fun</code> methods once, rather than spawning a shred that keeps running.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="full-source">
+  <h2><a class="anchor" href="#full-source">#</a> Full source, for reference</h2>
+  <p>Expand this any time you want the whole file in view while reading a section below.</p>
+  <details class="source-block">
+    <summary>raagTableRenderer.js — click to expand</summary>
+    <ol class="code-lines">
+<li>/**</li>
+<li> * Renders (or re-renders) a table showing every property on a Raag instance.</li>
+<li> *</li>
+<li> * Column 1 — property name (raw key, e.g. "aaroh_jaati")</li>
+<li> * Column 2 — human-readable value.</li>
+<li> *             - Editable properties (see EDITABLE_PROPERTIES below) get a</li>
+<li> *               real &lt;input&gt; the user can type into. On change, the typed</li>
+<li> *               text is parsed back into the property's real type and</li>
+<li> *               written onto currentRaag, then the whole table re-renders.</li>
+<li> *             - Everything else gets a read-only &lt;input&gt; (selectable/</li>
+<li> *               copyable, just can't be typed into) showing the calculated</li>
+<li> *               human-readable value.</li>
+<li> * Column 3 — the raw stored value (numbers/strings as-is, arrays as</li>
+<li> *             "[0, 2, 4, 7, 9, 12]"), always inside a non-editable &lt;output&gt;.</li>
+<li> *</li>
+<li> * Assumes these already exist elsewhere in your code:</li>
+<li> *   - notationMap / reverseNotationMap</li>
+<li> *   - string2IntArray(str)  -&gt; int[]   (human sargam string -&gt; raw array)</li>
+<li> *   - intArray2string(arr)  -&gt; string  (raw array -&gt; human sargam string)</li>
+<li> *</li>
+<li> * @param {object}      currentRaag  Your Raag class instance.</li>
+<li> * @param {HTMLElement} containerEl  Empty element to build the table into.</li>
+<li> * @param {function}    [onEdit]     Optional callback(key, newValue), fired</li>
+<li> *                                   right after an editable field is saved</li>
+<li> *                                   onto currentRaag — this is where you'd</li>
+<li> *                                   call your recalculation method (e.g.</li>
+<li> *                                   currentRaag.set(...)) BEFORE the table</li>
+<li> *                                   redraws, so the calculated columns</li>
+<li> *                                   update too. Without this, editing aaroh</li>
+<li> *                                   will only update aaroh — nothing derived</li>
+<li> *                                   from it will recompute.</li>
+<li> */</li>
+<li>function renderRaagTable(currentRaag, containerEl, onEdit) {</li>
+<li></li>
+<li>  // ── which properties the user is actually allowed to type into ──────────</li>
+<li>  // Adjust this list to match your class. Everything else on currentRaag</li>
+<li>  // is treated as calculated / read-only.</li>
+<li>  const EDITABLE_PROPERTIES = new Set([</li>
+<li>    'name',</li>
+<li>    'aaroh',</li>
+<li>    'avaroh'</li>
+<li>    // add more manually-entered columns here as needed, e.g.:</li>
+<li>    // 'carnatic_name', 'alternate_names', 'notes', 'vadi', 'samvaadi'</li>
+<li>  ]);</li>
+<li></li>
+<li>  // ── properties whose value is an array of svar ints, so they need</li>
+<li>  // notation conversion rather than being shown/parsed as plain text ──────</li>
+<li>  const SVAR_ARRAY_PROPERTIES = new Set([</li>
+<li>    'aaroh', 'avaroh', 'varjit_svar', 'varjit_svar_aaroh', 'varjit_svar_avaroh',</li>
+<li>    'svarset', 'imperfect_svarsthaan', 'detached_svarsthaan'</li>
+<li>  ]);</li>
+<li></li>
+<li>  // ── helpers ──────────────────────────────────────────────────────────</li>
+<li></li>
+<li>  function isChainArray(value) {</li>
+<li>    // 2D arrays like saa_pa_chains / saa_ga_chains</li>
+<li>    return Array.isArray(value) &amp;&amp; value.every(v =&gt; Array.isArray(v));</li>
+<li>  }</li>
+<li></li>
+<li>  function toHumanReadable(key, value) {</li>
+<li>    if (value === null || value === undefined) return '';</li>
+<li></li>
+<li>    if (isChainArray(value)) {</li>
+<li>      return value.map(chain =&gt; intArray2string(chain)).join('  |  ');</li>
+<li>    }</li>
+<li>    if (SVAR_ARRAY_PROPERTIES.has(key) &amp;&amp; Array.isArray(value)) {</li>
+<li>      return intArray2string(value);</li>
+<li>    }</li>
+<li>    if (typeof value === 'boolean') {</li>
+<li>      return value ? 'TRUE' : 'FALSE';</li>
+<li>    }</li>
+<li>    if (typeof value === 'number' &amp;&amp; !Number.isInteger(value)) {</li>
+<li>      return value.toFixed(3);</li>
+<li>    }</li>
+<li>    return String(value);</li>
+<li>  }</li>
+<li></li>
+<li>  function fromHumanReadable(key, text) {</li>
+<li>    if (SVAR_ARRAY_PROPERTIES.has(key)) {</li>
+<li>      return string2IntArray(text);</li>
+<li>    }</li>
+<li>    return text; // plain text/number fields — used exactly as typed</li>
+<li>  }</li>
+<li></li>
+<li>  function toRawString(value) {</li>
+<li>    if (value === null || value === undefined) return '—';</li>
+<li>    if (Array.isArray(value)) {</li>
+<li>      return '[' + value.map(toRawString).join(', ') + ']';</li>
+<li>    }</li>
+<li>    return String(value);</li>
+<li>  }</li>
+<li></li>
+<li>  // ── build the table ─────────────────────────────────────────────────</li>
+<li></li>
+<li>  containerEl.innerHTML = '';</li>
+<li></li>
+<li>  const table = document.createElement('table');</li>
+<li>  table.className = 'raag-props-table';</li>
+<li></li>
+<li>  const thead = document.createElement('thead');</li>
+<li>  thead.innerHTML = '&lt;tr&gt;&lt;th&gt;Property&lt;/th&gt;&lt;th&gt;Value&lt;/th&gt;&lt;th&gt;Raw Data&lt;/th&gt;&lt;/tr&gt;';</li>
+<li>  table.appendChild(thead);</li>
+<li></li>
+<li>  const tbody = document.createElement('tbody');</li>
+<li></li>
+<li>  for (const key of Object.keys(currentRaag)) {</li>
+<li>    const value = currentRaag[key];</li>
+<li>    const editable = EDITABLE_PROPERTIES.has(key);</li>
+<li></li>
+<li>    const row = document.createElement('tr');</li>
+<li>    row.className = editable ? 'row-editable' : 'row-calculated';</li>
+<li></li>
+<li>    // Column 1 — property name</li>
+<li>    const nameCell = document.createElement('td');</li>
+<li>    nameCell.className = 'prop-name';</li>
+<li>    nameCell.textContent = key;</li>
+<li>    row.appendChild(nameCell);</li>
+<li></li>
+<li>    // Column 2 — human-readable, editable or read-only</li>
+<li>    const displayCell = document.createElement('td');</li>
+<li>    const displayInput = document.createElement('input');</li>
+<li>    displayInput.type = 'text';</li>
+<li>    displayInput.value = toHumanReadable(key, value);</li>
+<li>    displayInput.setAttribute('aria-label', key);</li>
+<li></li>
+<li>    if (editable) {</li>
+<li>      displayInput.addEventListener('change', () =&gt; {</li>
+<li>        currentRaag[key] = fromHumanReadable(key, displayInput.value);</li>
+<li>        if (typeof onEdit === 'function') onEdit(key, currentRaag[key]);</li>
+<li>        renderRaagTable(currentRaag, containerEl, onEdit); // redraw with fresh calculated values</li>
+<li>      });</li>
+<li>    } else {</li>
+<li>      displayInput.readOnly = true;</li>
+<li>      displayInput.classList.add('calculated');</li>
+<li>    }</li>
+<li></li>
+<li>    displayCell.appendChild(displayInput);</li>
+<li>    row.appendChild(displayCell);</li>
+<li></li>
+<li>    // Column 3 — raw stored value, never editable</li>
+<li>    const rawCell = document.createElement('td');</li>
+<li>    const rawOutput = document.createElement('output');</li>
+<li>    rawOutput.textContent = toRawString(value);</li>
+<li>    rawCell.appendChild(rawOutput);</li>
+<li>    row.appendChild(rawCell);</li>
+<li></li>
+<li>    tbody.appendChild(row);</li>
+<li>  }</li>
+<li></li>
+<li>  table.appendChild(tbody);</li>
+<li>  containerEl.appendChild(table);</li>
+<li>}</li>
+<li></li>
+<li>/* ── example wiring ──────────────────────────────────────────────────</li>
+<li>renderRaagTable(currentRaag, document.getElementById('raag-table-container'), (key, newValue) =&gt; {</li>
+<li>  if (key === 'aaroh' || key === 'avaroh') {</li>
+<li>    currentRaag.set(currentRaag.aaroh, currentRaag.avaroh); // your recompute call</li>
+<li>  }</li>
+<li>});</li>
+<li>*/</li>
+    </ol>
+  </details>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<hr class="rule">
+
+<section id="jsdoc">
+  <h2><a class="anchor" href="#jsdoc">#</a> Doc comments — <code>/** ... */</code></h2>
+  <p>
+    The block at the top of the file is a <strong>JSDoc comment</strong>. It's still just a
+    comment — the engine ignores it completely — but its specific shape
+    (<code>/**</code> to open, <code>@param</code> tags for each parameter) is a convention that
+    editors like VS Code understand. Hover over a call to <code>renderRaagTable(...)</code>
+    anywhere else in your project and the editor will pop up this exact description, including
+    which parameters are optional.
+  </p>
+  <p>
+    The square brackets around <code>[onEdit]</code> in <code>@param {function} [onEdit]</code>
+    is JSDoc's way of marking a parameter optional — that's a documentation convention, not JS
+    syntax; the real optionality is handled by the language itself, covered next.
+  </p>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      This plays a similar role to the comment banners you already write above your ChucK
+      functions (like the <code>// ============</code> header blocks in <code>Raag_class</code>),
+      just in a format tools can parse. ChucK has no built-in equivalent that editors read
+      automatically.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="function-signature">
+  <h2><a class="anchor" href="#function-signature">#</a> The function &amp; its parameters</h2>
+  <pre><code>function renderRaagTable(currentRaag, containerEl, onEdit) {</code></pre>
+  <p>
+    Three parameters, no types written anywhere. <code>currentRaag</code> will be your Raag
+    instance, <code>containerEl</code> an existing, empty DOM element to build the table inside,
+    and <code>onEdit</code> is optional — if the caller doesn't pass a third argument, JavaScript
+    doesn't error out; <code>onEdit</code> is simply <code>undefined</code> inside the function
+    body. That's what the guard in <a href="#optional-callback">The optional onEdit hook</a>
+    checks for.
+  </p>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      In ChucK every parameter is typed and every call must supply all of them — which is
+      exactly why your own <code>Raag_class</code> defines pairs like
+      <code>fun int generic_svar_info(int id1, int id2)</code> and a zero-argument
+      <code>fun int generic_svar_info()</code> that just calls the first with defaults. That's
+      ChucK's way of faking an optional parameter: write two overloads. JS doesn't need the
+      second overload — one function, with an argument you're free to omit, does the same job.
+      The trade-off is that JS won't stop you from forgetting an argument by accident; there's no
+      compiler catching it, only whatever check you write yourself (like the <code>typeof</code>
+      guard here).
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="sets">
+  <h2><a class="anchor" href="#sets">#</a> The <code>Set</code></h2>
+  <pre><code>const EDITABLE_PROPERTIES = new Set([
+  'name', 'aaroh', 'avaroh'
+]);
+...
+const editable = EDITABLE_PROPERTIES.has(key);</code></pre>
+  <p>
+    A <code>Set</code> is a built-in collection that stores unique values and answers one
+    question fast: "do you contain this?" — <code>.has(value)</code> returns <code>true</code> or
+    <code>false</code>. It's the right tool here because that's the <em>only</em> question ever
+    asked of <code>EDITABLE_PROPERTIES</code> and <code>SVAR_ARRAY_PROPERTIES</code>: is this
+    particular key in the list.
+  </p>
+  <p>
+    A plain array could hold the same strings, but checking membership would mean writing your
+    own loop (or calling <code>.includes()</code>, which loops internally) every single time.
+    <code>Set</code> exists specifically so "is X in this collection" reads as one clear method
+    call instead of a loop you have to re-justify every time you see it.
+  </p>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      This is the same category of problem your <code>Array</code> class's
+      <code>find(lookupValue, lookupArray)</code> solves — loop through, compare each element,
+      return whether/where it matched. <code>Set.has()</code> is JS's built-in version of exactly
+      that idea, minus writing the loop yourself.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="scope-closures">
+  <h2><a class="anchor" href="#scope-closures">#</a> Scope &amp; closures</h2>
+  <p>
+    Notice where <code>EDITABLE_PROPERTIES</code>, <code>SVAR_ARRAY_PROPERTIES</code>, and all
+    four helper functions (<code>isChainArray</code>, <code>toHumanReadable</code>,
+    <code>fromHumanReadable</code>, <code>toRawString</code>) are declared: <em>inside</em>
+    <code>renderRaagTable</code>, not above it at the top of the file. That placement is
+    deliberate — it means nothing outside this function can see or touch them, and they don't
+    pollute whatever else lives in your project's global scope.
+  </p>
+  <p>
+    The helper functions can still reference <code>EDITABLE_PROPERTIES</code> and
+    <code>SVAR_ARRAY_PROPERTIES</code> even though those aren't passed in as parameters — that's
+    a <strong>closure</strong>. Any function remembers the variables that were in scope
+    <em>where it was defined</em>, not just the ones handed to it explicitly. Because
+    <code>toHumanReadable</code> is defined inside <code>renderRaagTable</code>, it closes over
+    (keeps access to) everything declared above it in that same function body.
+  </p>
+  <aside class="gotcha">
+    <span class="aside-label">worth knowing</span>
+    <p>
+      Because they're declared inside the function, both <code>Set</code>s and all four helpers
+      get rebuilt from scratch on <em>every single call</em> to <code>renderRaagTable</code> —
+      including the recursive redraw after an edit. At ~80 rows that's irrelevant, but it's a
+      real trade-off: simplicity (everything the function needs lives right there, easy to read
+      top to bottom) versus a small, repeated cost. If this were rendering thousands of rows on
+      every keystroke, you'd move the two <code>Set</code>s above/outside the function so they're
+      built once, ever. Try it yourself — see
+      <a href="#next-steps">Exercises</a>.
+    </p>
+  </aside>
+  <p>
+    <code>const</code> just means the variable name itself can't be reassigned to point at
+    something else — it does <em>not</em> mean the value is frozen. <code>table</code>,
+    <code>row</code>, and the two <code>Set</code>s are all declared <code>const</code>, yet the
+    code still calls methods on them (<code>row.appendChild(...)</code>) that change their
+    contents. What <code>const</code> forbids is <code>table = somethingElse</code> later on —
+    reassigning the variable, not mutating what it points to.
+  </p>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      ChucK's class-scope variables (declared once at the top of <code>Raag_class</code>, like
+      <code>int aaroh[0];</code>) are visible to every <code>fun</code> in that class without
+      being passed as parameters — same underlying idea as a closure: code declared "inside" a
+      surrounding scope can see that scope's variables. The difference is that ChucK's version is
+      tied to the whole class instance and lasts as long as the instance does; a JS closure is
+      tied to one specific <em>call</em> of the outer function, and a fresh one is created every
+      time you call it again.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="arrow-functions">
+  <h2><a class="anchor" href="#arrow-functions">#</a> Arrow functions</h2>
+  <pre><code>value.every(v => Array.isArray(v))
+value.map(chain => intArray2string(chain))
+displayInput.addEventListener('change', () => { ... });</code></pre>
+  <p>
+    <code>v => Array.isArray(v)</code> is a small, unnamed function — take one input
+    (<code>v</code>), return the result of one expression, no <code>function</code> keyword, no
+    <code>{ }</code> or explicit <code>return</code> needed for a single expression. It's used
+    here purely as a value to hand to another function: <code>.every()</code>, <code>.map()</code>,
+    and <code>addEventListener()</code> all expect "a function to call later" as one of their
+    arguments, so these are written right where they're needed instead of being declared,
+    named, and referenced separately.
+  </p>
+  <p>
+    The <code>()</code> with nothing inside, in <code>() => { ... }</code>, means the function
+    takes no arguments — that's the <code>change</code> event handler, which doesn't need any
+    input to do its job; everything it needs (<code>key</code>, <code>displayInput</code>) is
+    already available via closure.
+  </p>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      ChucK doesn't have an equivalent — functions there are always declared with
+      <code>fun</code> and a name. The nearest JS relative of a named <code>fun</code> is a
+      regular <code>function toHumanReadable(...) { ... }</code> declaration (used for the four
+      helpers here). Arrow functions are specifically for the "quick, throwaway, defined right
+      where it's used" case, which ChucK doesn't really have a shorthand for.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="ternary">
+  <h2><a class="anchor" href="#ternary">#</a> The ternary operator</h2>
+  <pre><code>row.className = editable ? 'row-editable' : 'row-calculated';
+return value ? 'TRUE' : 'FALSE';</code></pre>
+  <p>
+    <code>condition ? valueIfTrue : valueIfFalse</code> is a compact <code>if / else</code> that
+    produces a value instead of running a block of statements. The first line reads as: "if
+    <code>editable</code> is true, use the string <code>'row-editable'</code>; otherwise use
+    <code>'row-calculated'</code>" — and whichever string comes out gets assigned to
+    <code>row.className</code> directly.
+  </p>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      Same C-family <code>?:</code> shorthand ChucK also supports — if you've reached for it
+      there, this is identical syntax and identical behavior.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="array-methods">
+  <h2><a class="anchor" href="#array-methods">#</a> <code>every</code>, <code>map</code>, <code>join</code></h2>
+  <p>
+    Three array methods do most of the data-shaping work in this file:
+  </p>
+  <ul>
+    <li>
+      <code>.every(fn)</code> — checks <code>fn</code> against <em>every</em> element and returns
+      one <code>true</code>/<code>false</code>. <code>isChainArray</code> uses it to ask "is
+      every item in this array itself an array?"
+    </li>
+    <li>
+      <code>.map(fn)</code> — runs <code>fn</code> on each element and returns a
+      <em>new</em> array of the results, same length, original untouched. Used twice: turning
+      each chain into a display string, and (recursively) turning each raw value into its
+      string form.
+    </li>
+    <li>
+      <code>.join(separator)</code> — glues an array of strings into one string, with
+      <code>separator</code> between each pair. <code>['S','R','G'].join(', ')</code> becomes
+      <code>"S, R, G"</code>.
+    </li>
+  </ul>
+  <p>
+    These are typically chained: <code>value.map(chain => intArray2string(chain)).join('  |  ')</code>
+    first turns an array of chains into an array of strings, then glues those strings together
+    with a visible separator.
+  </p>
+  <aside class="gotcha">
+    <span class="aside-label">worth knowing</span>
+    <p>
+      <code>.every()</code> on an <strong>empty</strong> array always returns <code>true</code>,
+      for any condition — there's nothing to fail the check on, so it's vacuously true. That
+      means <code>isChainArray([])</code> is <code>true</code>: an empty array can't be told
+      apart from an empty 2D array just by looking at its shape. Harmless here (both cases end up
+      displaying nothing), but it's a classic edge case worth having a reflex for — "empty passes
+      <code>.every()</code>, always."
+    </p>
+  </aside>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      Every one of these replaces a <code>for (int i; i &lt; arr.cap(); i++)</code> loop you'd
+      write by hand in ChucK. <code>.map()</code> is the closest thing to what your own
+      <code>Array</code> class's <code>reset()</code>/<code>rotate()</code> functions do
+      manually: build a brand-new array by transforming each element of an old one.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="typeof">
+  <h2><a class="anchor" href="#typeof">#</a> <code>typeof</code> &amp; dynamic typing</h2>
+  <pre><code>if (typeof value === 'boolean') { ... }
+if (typeof value === 'number' && !Number.isInteger(value)) { ... }
+if (typeof onEdit === 'function') { ... }</code></pre>
+  <p>
+    <code>typeof</code> returns a string naming the runtime type of whatever follows it:
+    <code>'number'</code>, <code>'string'</code>, <code>'boolean'</code>,
+    <code>'function'</code>, <code>'undefined'</code>, or <code>'object'</code>. This code
+    checks type <em>at runtime</em> because it has to — a single property on
+    <code>currentRaag</code> could hold a number, a string, a boolean, or an array depending on
+    which one it is, and nothing in the language forces it to declare that ahead of time.
+  </p>
+  <aside class="gotcha">
+    <span class="aside-label">worth knowing</span>
+    <p>
+      <code>typeof</code> is a genuinely quirky tool. <code>typeof []</code> is
+      <code>'object'</code> (arrays are objects under the hood) and, even stranger,
+      <code>typeof null</code> is also <code>'object'</code> — a decades-old bug in the language
+      that's now permanent for backwards compatibility. That's exactly why this file never writes
+      <code>typeof value === 'object'</code> to detect arrays — it uses the dedicated
+      <a href="#isarray"><code>Array.isArray()</code></a> instead, and checks
+      <code>value === null</code> with a plain equality comparison rather than
+      <code>typeof</code>.
+    </p>
+  </aside>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      This is the biggest mental shift coming from ChucK. In
+      <code>Raag_class</code>, every single variable declares its type up front —
+      <code>int aaroh_jaati;</code>, <code>float shuddhataa_rank;</code> — and the compiler
+      enforces it before your code ever runs; putting a string into an <code>int</code> variable
+      simply won't compile. In JS, a variable is just a label that can point at any kind of value,
+      and it can point at a different kind of value tomorrow. Nothing stops you from writing
+      <code>let x = 5; x = "hello";</code> — both lines are completely legal. That flexibility is
+      exactly why <code>typeof</code> exists: since the "shape" of a value isn't nailed down by
+      the language, code that needs to behave differently for different types has to ask, in
+      real time, "what actually is this thing right now?"
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="isarray">
+  <h2><a class="anchor" href="#isarray">#</a> <code>Array.isArray()</code></h2>
+  <pre><code>if (Array.isArray(value)) {
+  return '[' + value.map(toRawString).join(', ') + ']';
+}</code></pre>
+  <p>
+    Because <code>typeof</code> can't tell an array from any other object (see above),
+    JavaScript provides a dedicated, purpose-built check: <code>Array.isArray(value)</code>. It's
+    used everywhere in this file that needs to branch on "is this a list of things or a single
+    value" — deciding whether to loop/map over something or just print it directly.
+  </p>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="recursion">
+  <h2><a class="anchor" href="#recursion">#</a> Recursion — twice, in two different flavors</h2>
+  <p>
+    A function calling itself shows up twice in this file, doing two genuinely different jobs.
+  </p>
+  <p><strong>1. Computing a value — <code>toRawString</code>:</strong></p>
+  <pre><code>function toRawString(value) {
+  if (value === null || value === undefined) return '—';
+  if (Array.isArray(value)) {
+    return '[' + value.map(toRawString).join(', ') + ']';
+  }
+  return String(value);
+}</code></pre>
+  <p>
+    For a nested array like <code>saa_pa_chains</code> (an array of arrays), each inner array
+    also needs the <code>[a, b, c]</code> treatment. Rather than writing separate logic for "one
+    level deep" and "two levels deep," <code>toRawString</code> calls <em>itself</em> on each
+    element via <code>value.map(toRawString)</code>. Every recursive function needs a
+    <strong>base case</strong> — a condition where it stops calling itself and just returns a
+    plain answer. Here that's <code>return String(value)</code>: the moment <code>value</code>
+    isn't an array anymore, the recursion bottoms out.
+  </p>
+  <p><strong>2. Restarting a process — <code>renderRaagTable</code>:</strong></p>
+  <pre><code>renderRaagTable(currentRaag, containerEl, onEdit); // redraw with fresh calculated values</code></pre>
+  <p>
+    This is a different shape of recursion — not "compute a smaller version of the same
+    question," but "when something changes, throw the whole table away and build it again from
+    scratch." It's safe specifically because every call starts with
+    <code>containerEl.innerHTML = ''</code>, so there's never leftover state from the previous
+    call to worry about. This call only ever happens from <em>inside</em> a <code>change</code>
+    event handler — triggered by an actual person editing an actual field — so it can never spin
+    in an uncontrolled loop the way a recursive function with no base case (or a ChucK
+    <code>while(1)</code> with nothing pausing it) would.
+  </p>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="nullish">
+  <h2><a class="anchor" href="#nullish">#</a> <code>null</code> vs <code>undefined</code></h2>
+  <pre><code>if (value === null || value === undefined) return '';</code></pre>
+  <p>
+    JS has two different "nothing" values. <code>undefined</code> is what you get automatically —
+    a variable that was declared but never assigned, an object property that was never set, a
+    function parameter nobody passed in (like <code>onEdit</code> when it's omitted).
+    <code>null</code> is a "nothing" someone had to write on purpose, usually meaning "this
+    exists as a concept but deliberately has no value" — exactly how your Supabase columns use
+    it, per your own project convention: <code>NULL</code> means "not yet entered," not zero,
+    not empty string.
+  </p>
+  <p>
+    This check catches both, because a freshly-constructed <code>currentRaag</code> could have
+    properties that are still JS's default <code>undefined</code>, or properties explicitly set
+    to <code>null</code> to mirror an un-classified database column. Either way, the table should
+    show a blank box rather than the literal text "null" or "undefined."
+  </p>
+  <aside class="gotcha">
+    <span class="aside-label">worth knowing</span>
+    <p>
+      This is exactly why the check happens <em>before</em> <code>String(value)</code> is ever
+      reached. <code>String(null)</code> genuinely returns the three-character string
+      <code>"null"</code>, and <code>String(undefined)</code> returns
+      <code>"undefined"</code> — without the guard at the top, every unset field would visibly
+      display that word instead of being blank.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="strings">
+  <h2><a class="anchor" href="#strings">#</a> Building strings</h2>
+  <pre><code>return '[' + value.map(toRawString).join(', ') + ']';</code></pre>
+  <p>
+    <code>+</code> between strings concatenates them, same as most C-family languages. This isn't
+    the only way to build a string in modern JS — <strong>template literals</strong>, written
+    with backticks, let you embed values directly:
+    <code>`[${value.join(', ')}]`</code> instead of
+    <code>'[' + value.join(', ') + ']'</code>. This file sticks to plain
+    <code>+</code> concatenation throughout, which is perfectly normal and arguably clearer for
+    something this short — but template literals are worth knowing, since you'll see them
+    constantly in other JS code (including elsewhere in this project, e.g.
+    <code>raags_search.js</code>).
+  </p>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="dom-basics">
+  <h2><a class="anchor" href="#dom-basics">#</a> <code>createElement</code> &amp; friends</h2>
+  <pre><code>const row = document.createElement('tr');
+row.className = editable ? 'row-editable' : 'row-calculated';
+nameCell.textContent = key;
+row.appendChild(nameCell);</code></pre>
+  <p>
+    This is JS building HTML by hand instead of you writing it as static markup.
+    <code>document.createElement('tr')</code> makes a brand-new, empty <code>&lt;tr&gt;</code>
+    element that doesn't exist on the page yet — it's just sitting in memory. Setting
+    <code>.className</code> is the same as writing <code>class="..."</code> in HTML directly.
+    <code>.appendChild(child)</code> is what actually places one element inside another, building
+    up the tree; nothing appears on the actual page until the finished tree gets attached to
+    something already on it (the last line of the function,
+    <code>containerEl.appendChild(table)</code>, is what finally makes all of this visible).
+  </p>
+  <p>
+    Two different ways of putting text into an element show up here, deliberately:
+    <code>.textContent</code> and <code>.innerHTML</code>. <code>nameCell.textContent = key</code>
+    inserts <code>key</code> as plain text, exactly as-is, no matter what characters it contains.
+    <code>thead.innerHTML = '&lt;tr&gt;&lt;th&gt;...'</code> instead parses the string as actual
+    HTML markup and builds real <code>&lt;tr&gt;</code>/<code>&lt;th&gt;</code> elements from it.
+  </p>
+  <aside class="gotcha">
+    <span class="aside-label">worth knowing</span>
+    <p>
+      <code>innerHTML</code> is only used twice in this file, and both times on a fixed string
+      you wrote yourself — the header row, and <code>containerEl.innerHTML = ''</code> to clear
+      it out. It is never used for anything that came from <code>currentRaag</code>. That's not
+      an accident: if a property value ever contained characters that look like HTML (say, a
+      name with a stray <code>&lt;</code> in it), running it through <code>innerHTML</code> would
+      let it get parsed as markup instead of shown as text — everywhere actual data gets
+      displayed (<code>nameCell.textContent</code>, <code>rawOutput.textContent</code>,
+      <code>displayInput.value</code>), this file uses <code>.textContent</code> or
+      <code>.value</code> instead, which never parses anything, ever. Good general rule:
+      <code>innerHTML</code> only for markup <em>you</em> wrote; <code>textContent</code>/
+      <code>.value</code> for anything that came from data.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="bracket-notation">
+  <h2><a class="anchor" href="#bracket-notation">#</a> Dynamic property access — <code>obj[key]</code></h2>
+  <pre><code>const value = currentRaag[key];
+...
+currentRaag[key] = fromHumanReadable(key, displayInput.value);</code></pre>
+  <p>
+    <code>currentRaag.aaroh</code> (dot notation) only works when you know the exact property
+    name while you're writing the code. Here, <code>key</code> is a variable — a different string
+    on every loop iteration — so the property being read or written isn't known until the code is
+    actually running. Square-bracket notation, <code>currentRaag[key]</code>, accepts any
+    expression that evaluates to a string and reads/writes <em>that</em> property. This single
+    line is what makes the whole function generic: it never has to be told the property names in
+    advance, or edited when you add a new column to the Raag class.
+  </p>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="object-keys">
+  <h2><a class="anchor" href="#object-keys">#</a> <code>Object.keys()</code> &amp; iteration order</h2>
+  <pre><code>for (const key of Object.keys(currentRaag)) {
+  ...
+}</code></pre>
+  <p>
+    <code>Object.keys(obj)</code> returns a plain array containing the name of every property
+    <code>obj</code> owns, as strings — <code>['name', 'aaroh', 'avaroh', 'thaat_id', ...]</code>.
+    <code>for (const key of someArray)</code> then visits each one in turn, handing you the
+    <em>value</em> (here, each key string) directly — no index variable needed unless you ask for
+    one. This is different from the C-style loop you'd write in ChucK
+    (<code>for (int i; i &lt; arr.cap(); i++)</code>), where you get an index and have to look up
+    <code>arr[i]</code> yourself; <code>for...of</code> skips straight to the element.
+  </p>
+  <p>
+    Crucially, this relies on a real guarantee, not luck: for plain string property names (which
+    is all of these — none of your column names are pure numbers), JS iterates them in the exact
+    order they were first assigned. Since your class constructor assigns properties in the same
+    order as the ChucK class declaration (per your project's convention), this loop naturally
+    produces table rows in that same Minimal → Maximum tier order, with zero sorting logic
+    needed.
+  </p>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="semantic-inputs">
+  <h2><a class="anchor" href="#semantic-inputs">#</a> <code>input</code>, <code>output</code>, and <code>readonly</code></h2>
+  <pre><code>displayInput.readOnly = true;
+...
+const rawOutput = document.createElement('output');</code></pre>
+  <p>
+    Column 3 deliberately uses <code>&lt;output&gt;</code> rather than another
+    <code>&lt;input&gt;</code> — it's the semantically correct element for "the result of a
+    calculation," and browsers/screen readers treat it accordingly. It's never interactive at
+    all, so there's no editable-vs-not distinction to manage for it.
+  </p>
+  <p>
+    Column 2 always uses an <code>&lt;input&gt;</code>, editable or not, so both states look and
+    behave consistently (selectable, copyable text in a box) — the only difference is the
+    <code>readOnly</code> property. One naming gotcha worth flagging: in JS, DOM properties are
+    always camelCase — <code>input.readOnly</code> — even though the matching HTML attribute is
+    written lowercase, <code>&lt;input readonly&gt;</code>. Setting
+    <code>displayInput.readOnly = true</code> from JS is exactly equivalent to typing
+    <code>readonly</code> in the HTML by hand.
+  </p>
+  <aside class="gotcha">
+    <span class="aside-label">worth knowing</span>
+    <p>
+      <code>readonly</code> and <code>disabled</code> are not the same thing, even though they
+      look similar. A <code>readonly</code> input can still be focused, selected, and copied from
+      — just not typed into. A <code>disabled</code> input is entirely inert: it can't be
+      focused, its text is harder to select, and — important if this ever lives inside a real
+      <code>&lt;form&gt;</code> — disabled fields don't get submitted at all. This file uses
+      <code>readOnly</code> specifically so you can still click into a calculated cell and copy
+      its value out.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="events">
+  <h2><a class="anchor" href="#events">#</a> Events — <code>addEventListener</code></h2>
+  <pre><code>displayInput.addEventListener('change', () => {
+  currentRaag[key] = fromHumanReadable(key, displayInput.value);
+  if (typeof onEdit === 'function') onEdit(key, currentRaag[key]);
+  renderRaagTable(currentRaag, containerEl, onEdit);
+});</code></pre>
+  <p>
+    <code>addEventListener(eventName, callback)</code> registers a function to be called later,
+    whenever that named event happens on that element. It does not run
+    <code>callback</code> immediately — it hands the browser a function and says "hold onto
+    this, and call it for me when the moment comes." <code>'change'</code> specifically fires
+    once a text input's value has been committed — on blur (clicking/tabbing away) or pressing
+    Enter — not on every individual keystroke. That's a deliberate choice here: it means the
+    table only redraws once you're actually done typing, rather than on every letter (the event
+    <code>'input'</code> would fire on every keystroke instead, if you ever wanted that
+    behavior).
+  </p>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      The closest thing you already know is a ChucK <code>Event</code>: a shred calls
+      <code>.wait()</code> on it and the VM suspends that shred until something else
+      <code>.broadcast()</code>s it, then resumes exactly where it left off. Browser events work
+      toward the same goal — react to something happening later, without polling for it in a loop
+      — but the mechanics differ. Nothing here pauses. By the time the person actually edits a
+      box, <code>renderRaagTable</code> finished running and returned a long time ago; the
+      browser kept the little arrow function you handed it in memory, and calls it fresh,
+      independent of anything else your code is doing at that moment.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="classes">
+  <h2><a class="anchor" href="#classes">#</a> Your class, revisited</h2>
+  <p>
+    <code>currentRaag</code> is an instance of the Raag class you wrote — presumably built with
+    something like <code>this.aaroh = [...]</code> for each property inside its constructor.
+    <code>Object.keys(currentRaag)</code> only returns properties that instance actually
+    <strong>owns</strong> — the ones assigned directly onto it, typically in the constructor.
+    Methods you define in the class body (things like a hypothetical <code>currentRaag.set(...)</code>)
+    live on the class's <code>prototype</code>, shared by every instance, not copied onto each
+    individual object — so they're automatically excluded from this loop with zero filtering
+    code needed. That's what lets the table only ever show data columns, never functions.
+  </p>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="optional-callback">
+  <h2><a class="anchor" href="#optional-callback">#</a> The optional <code>onEdit</code> hook</h2>
+  <pre><code>if (typeof onEdit === 'function') onEdit(key, currentRaag[key]);</code></pre>
+  <p>
+    Since <code>onEdit</code> might genuinely be <code>undefined</code> (nobody's obligated to
+    pass a third argument), calling it blindly — <code>onEdit(key, currentRaag[key])</code> with
+    no check — would throw an error the moment somebody calls
+    <code>renderRaagTable(currentRaag, containerEl)</code> with only two arguments. The
+    <code>typeof onEdit === 'function'</code> guard makes the callback truly optional: call it
+    only if the caller actually supplied a real function.
+  </p>
+  <p>
+    This is the hook you're meant to use for recomputation — see the example wiring at the bottom
+    of the source file, and the callback in <code>fromHumanReadable</code>/change handler flow
+    covered fully next.
+  </p>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="render-cycle">
+  <h2><a class="anchor" href="#render-cycle">#</a> The render cycle, start to finish</h2>
+  <p>Every concept above comes together in one loop:</p>
+  <ol class="exercises">
+    <li>
+      Something calls <code>renderRaagTable(currentRaag, containerEl, onEdit)</code> the first
+      time — e.g. right after your ChucK-mirroring calculator finishes computing
+      <code>currentRaag</code>.
+    </li>
+    <li>
+      The function clears <code>containerEl</code>, builds a fresh <code>&lt;table&gt;</code>,
+      and loops over <a href="#object-keys"><code>Object.keys(currentRaag)</code></a>, building
+      one row per property using everything in <a href="#dom-basics">createElement &amp; friends</a>.
+    </li>
+    <li>
+      If the person edits an editable box and moves away from it, the browser fires a
+      <code>'change'</code> event, which calls the small arrow function registered back in
+      <a href="#events">Events</a>.
+    </li>
+    <li>
+      That callback parses the typed text back into real data
+      (<a href="#bracket-notation"><code>fromHumanReadable</code></a>), writes it onto
+      <code>currentRaag[key]</code>, calls your <a href="#optional-callback"><code>onEdit</code></a>
+      hook if you gave it one (this is where you'd recompute everything derived from
+      aaroh/avaroh), then calls <code>renderRaagTable</code> again —
+      <a href="#recursion">recursively</a> — to redraw the whole table with fresh values.
+    </li>
+    <li>
+      Because step 2 always starts by clearing the container, there's no leftover DOM from the
+      previous render to clean up or worry about — the new table simply replaces the old one
+      completely.
+    </li>
+  </ol>
+  <aside class="chuck">
+    <span class="aside-label">🎼 ChucK bridge</span>
+    <p>
+      This "state changes → throw away the old output → rebuild it fresh from current state"
+      shape is a genuinely common pattern in JS UI code (frameworks like React formalize it as
+      their core idea), so it's worth recognizing by name now: rather than trying to patch the
+      existing table in place (find the one changed cell, update just that), it's often simpler
+      and less error-prone to just regenerate the whole thing from scratch whenever anything
+      changes. At small scale — 80 rows — the cost of rebuilding everything is invisible to a
+      person clicking around, so simplicity wins over micro-optimizing.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="next-steps">
+  <h2><a class="anchor" href="#next-steps">#</a> Exercises &amp; further reading</h2>
+  <p>Small, scoped things to try directly in this file, to make each concept stick:</p>
+  <aside class="try">
+    <span class="aside-label">try it</span>
+    <ol class="exercises">
+      <li>
+        Move <code>EDITABLE_PROPERTIES</code> and <code>SVAR_ARRAY_PROPERTIES</code> out of
+        <code>renderRaagTable</code> to the top of the file, outside any function. The code
+        should behave identically — confirm it does, then you've felt the
+        <a href="#scope-closures">scope &amp; closures</a> trade-off firsthand.
+      </li>
+      <li>
+        Change one field's event from <code>'change'</code> to <code>'input'</code> and watch how
+        much more often the table redraws while you type. Change it back once you've seen it.
+      </li>
+      <li>
+        Rewrite <code>toRawString</code>'s <code>'[' + value.join(', ') + ']'</code> using a
+        template literal instead — see <a href="#strings">Building strings</a>.
+      </li>
+      <li>
+        Add a <code>console.log('rendering', Object.keys(currentRaag).length, 'rows')</code> as
+        the very first line inside <code>renderRaagTable</code>, open your browser console, and
+        count how many times it fires as you edit two or three fields in a row.
+      </li>
+      <li>
+        Replace the <code>value === null || value === undefined</code> check with the
+        <code>??</code> (nullish coalescing) operator — e.g.
+        <code>return toHumanReadableInner(value) ?? '';</code> style — and look up why it exists
+        specifically to shorten this exact pattern.
+      </li>
+    </ol>
+  </aside>
+  <p>MDN's reference pages, for whenever you want the formal definition of something above:</p>
+  <ul>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures" target="_blank" rel="noopener">Closures</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set" target="_blank" rel="noopener">Set</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions" target="_blank" rel="noopener">Arrow functions</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof" target="_blank" rel="noopener">typeof</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray" target="_blank" rel="noopener">Array.isArray</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every" target="_blank" rel="noopener">Array.prototype.every</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map" target="_blank" rel="noopener">Array.prototype.map</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Glossary/Recursion" target="_blank" rel="noopener">Recursion</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing" target="_blank" rel="noopener">Nullish coalescing (??)</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals" target="_blank" rel="noopener">Template literals</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys" target="_blank" rel="noopener">Object.keys</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener" target="_blank" rel="noopener">addEventListener</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/output" target="_blank" rel="noopener">The &lt;output&gt; element</a></li>
+  </ul>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+</main>
+
+<footer>
+  Naadaalay DB — JS companion for raagTableRenderer.js. Self-contained, no external requests: safe to save and open offline.
+</footer>
+
+<script>
+(function(){
+  // ── mobile TOC toggle ──────────────────────────────────────
+  var toggle = document.getElementById('tocToggle');
+  var toc = document.getElementById('toc');
+  toggle.addEventListener('click', function(){
+    var open = toc.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  toc.querySelectorAll('a.toc-link').forEach(function(link){
+    link.addEventListener('click', function(){
+      toc.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  // ── scroll-spy: highlight the current section's TOC link ──
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+  var links = {};
+  toc.querySelectorAll('a.toc-link').forEach(function(link){
+    links[link.getAttribute('href').slice(1)] = link;
+  });
+
+  if ('IntersectionObserver' in window){
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var link = links[entry.target.id];
+        if (!link) return;
+        if (entry.isIntersecting){
+          Object.keys(links).forEach(function(id){ links[id].classList.remove('active'); });
+          link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -75% 0px', threshold: 0 });
+
+    sections.forEach(function(s){ observer.observe(s); });
+  }
+})();
+</script>
+
+</body>
+</html>

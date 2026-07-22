@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raag Entry</title>
+<style>
+  body{ font-family: system-ui, sans-serif; max-width: 900px; margin: 2em auto; padding: 0 1em; }
+  table{ border-collapse: collapse; width: 100%; }
+  td, th{ border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+  input[readonly]{ background: #f2f2f2; color: #555; }
+  pre{ background: #111; color: #eee; padding: 1em; overflow-x: auto; white-space: pre-wrap; }
+  #copy-status{ font-size: 0.9em; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Raag Entry</h1>
+
+<div id="raag-table-container"></div>
+
+<p>
+  <button id="output-btn" type="button">Output SQL</button>
+  <span id="copy-status"></span>
+</p>
+
+<pre><code id="sql-output-code"></code></pre>
+
+<!-- ── your existing files — adjust these two paths to match your project ── -->
+<script src="raag_class.js"></script>
+<!-- defines the Raag class -->
+<script src="database.js"></script>
+<!-- defines notationMap, reverseNotationMap, string2IntArray, intArray2string -->
+
+<!-- ── files from this project ── -->
+<script src="raagTableRenderer.js"></script>
+<script src="raagToSqlGenerator.js"></script>
+
+<script>
+  // Adjust this if your constructor takes arguments.
+  const currentRaag = new Raag();
+
+  function redrawTable() {
+    renderRaagTable(currentRaag, document.getElementById('raag-table-container'), (key, newValue) => {
+      // Hook your recompute method here, e.g.:
+      // if (key === 'aaroh' || key === 'avaroh') currentRaag.set(currentRaag.aaroh, currentRaag.avaroh);
+    });
+  }
+
+  redrawTable();
+
+  document.getElementById('output-btn').addEventListener('click', async () => {
+    const sql = generateRaagInsertSQL(currentRaag);
+    document.getElementById('sql-output-code').textContent = sql;
+
+    const statusEl = document.getElementById('copy-status');
+    try {
+      await navigator.clipboard.writeText(sql);
+      statusEl.textContent = 'Copied to clipboard.';
+    } catch (err) {
+      statusEl.textContent = 'Could not auto-copy — select the text above and copy manually.';
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Raag Data Generator · Naadaalay DB</title>
+<link rel="stylesheet" href="data_gen.css"> <!-- -->
+</head>
+<body>
+
+<header align="center">
+Raag Data Generator · Naadaalay DB
+</header>
+
+<main>
+
+<table width=100% border=1>
+  <colgroup>
+    <col class="property">
+    <col class="input">
+    <col class="output">
+  </colgroup>
+  <thead><tr>
+	  <th>Raag Property</th>
+	  <th>Input</th>
+	  <th>Calculated Value</th>
+  </tr></thead>
+<tr>
+	<td>Name</td>
+	<td><input id="nameInput" type="text" value="triShNaa" autofocus></td>
+	<td><output id="nameOutput" for="nameInput" name="Raag name"></output></td>
+</tr>
+<tr>
+	<td>Dimension</td>
+	<td>
+	<select id="dimensionInput" data-table="dimensions" data-display-column="name" name="Dimension" size="1" required>
+		<option value="-999">Select Dimension</option> 
+	</select>
+	<button id="make1Dbutton" type="button" class="both-toggle varjit" title="Fill avaroh as reversed aaroh">1D</button>
+	</td>
+	<td><output id="dimensionOutput" for="dimensionInput" name="dimension of raag"></output></td>
+</tr>
+
+<!-- 
+FLOW OF EVENTS FOR NOTATIONS FIELDS LIKE AAROH AVAROH
+User leaves input field
+        ↓
+cleanNotation()
+        ↓
+validateNotation()
+        ↓
+valid?
+   │
+   ├── Yes → continue
+   │
+   └── No
+          ↓
+showNotationError()
+          ↓
+alert()
+          ↓
+focus(input field)
+-->
+
+<tr>
+	<td>Aaroh</td>
+	<td><input id="aarohInput" type="text" value="  'N s   99 R g , p D    s'  "></td>
+	<td><output id="aarohOutput" for="aarohInput" name="aaroh input converted to int array for storage"></output></td>
+</tr>
+<tr>
+	<td>Avaroh</td>
+	<td><input id="avarohInput" type="text" value="S' d P g R , R G R S"> <!--  -->	</td>
+	<td><output id="avarohOutput" for="avarohInput" name="avaroh input converted to int array for storage"></output></td>
+</tr>
+<tr>
+	<td>Saa Absence</td>
+	<td>
+	<select id="saaAbsenceInput" data-table="saa_absence" data-display-column="name" name="saa_absence" size="1" required>
+		<option value="-999">Select Saa Absence</option> 
+	</select>
+	<button id="calculateSaaAbsenceButton" type="button" class="both-toggle varjit" title="Auto-Fill from aaroh avaroh">Auto</button>
+	</td>
+	<td><output id="saaAbsenceOutput" for="saaAbsenceInput" name="Saa absence options stored as int"></output></td>
+</tr>
+<tr>
+	<td>Ang ID</td>
+	<td><select id="angIDInput" data-table="angs" data-display-column="name" name="Ang ID" size="1">
+		<option value="null">Select Raagaang</option> 
+	</select></td>
+	<td><output id="angIDOutput" for="angIDInput" name="ang ID: foreign key to angs table"></output></td>
+</tr>
+<tr>
+	<td>Samay ID</td>
+	<td><select id="samayIDInput" data-table="samays" data-display-column="name" name="Samay ID" size="1">
+		<option value="null">Select Samay</option> 
+	</select></td>
+	<td><output id="samayIDOutput" for="samayIDInput" name="samay ID"></output></td>
+</tr>
+<tr>
+	<td>Taanpuraa Tuning</td>
+	<td><select id="taanpuraaTuningInput" data-table="taanpuraas" data-display-column="name" name="Taanpuraa Tuning" size="1">
+		<option value="null">Select Taanpuraa Tuning</option> 
+	</select></td>
+	<td><output id="taanpuraaTuningOutput" for="taanpuraaTuningInput" name="Taanpuraa Tuning"></output></td>
+</tr>
+<tr>
+	<td>Creator ID</td>
+	<td><select id="creatorIDInput" data-table="creators" data-display-column="name" name="Creator ID" size="1">
+		<option value="null">Select Creator</option> 
+	</select></td>
+	<td><output id="creatorIDOutput" for="creatorIDInput" name="creator ID: foreign key to creators table"></output></td>
+</tr>
+<tr>
+	<td>Popularity ID</td>
+	<td><select id="popularityIDInput" data-table="popularity" data-display-column="name" name="Popularity ID" size="1">
+		<option value="null">Select Popularity</option> 
+	</select></td>
+	<td><output id="popularityIDOutput" for="popularityIDInput" name="Popularity ID: foreign key to Popularity table"></output></td>
+</tr>
+<tr>
+	<td>Carnatic Name</td>
+	<td><input id="carnaticNameInput" type="text"></td>
+	<td><output id="carnaticNameOutput" for="carnaticNameInput" name="Carnatic Name"></output></td>
+</tr>
+<tr>
+	<td>Alternate Names</td>
+	<td><input id="alternateNamesInput" type="text"></td>
+	<td><output id="alternateNamesOutput" for="alternateNamesInput" name="Alternate Names"></output></td>
+</tr>
+<tr>
+	<td>Notes</td>
+	<td><input id="notesInput" type="text"></td>
+	<td><output id="notesOutput" for="notesInput" name="Notes"></output></td>
+</tr>
+</table>
+
+<div id="buttonSection" align="right">
+<button id="storeButton" type="button" class="both-toggle varjit" title="Store raag data in currentRaag object">Store</button>
+</div>
+
+<button id="calculateButton" type="button" class="both-toggle varjit" title="Calculate and display raag data">Calculate</button>
+<button id="validateButton" type="button" class="both-toggle varjit" title="Validate raag data">Validate</button>
+<button id="outputButton" type="button" class="both-toggle varjit" title="Output raag data">Output</button>
+
+<div id="raagInfoWrapper" align="center">
+<h5>Raag Info</h5>
+<pre id="raagInfo"></pre>
+</div>
+
+<div id="errorsDisplayWrapper" align="center">
+<h5>Errors Display</h5>
+<pre id="errorsDisplay"></pre>
+</div>
+
+<div id="outputDisplayWrapper" align="center">
+<h5>Output</h5>
+<pre id="output"></pre>
+</div>
+
+</main>
+
+<footer>
+<div id="consoleWrapper" align="center">
+<h6>Console Monitor</h6>
+<pre id="consoleMonitor"></pre>
+</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="database.js"></script>
+<script src="raag_class.js"></script>
+<script src="data_gen.js"></script>
+
+</body>
+</html>

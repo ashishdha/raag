@@ -1,0 +1,43 @@
+body {
+	font-family: system-ui, sans serif;
+}/**/
+
+table {
+	width: 100%;
+	table-layout: fixed;
+}
+
+/* Targets the 2nd cell in every row of the table body */
+table tbody tr td:nth-child(3) {
+    text-align: center;
+}
+
+table, th, td {
+	border: 1px solid #ccc;
+	border-collapse: collapse;
+}
+
+/* column widths */
+.property { width: 20%; }
+.input { width: 50%; }
+.output { width: 30%; }
+
+input {
+	border: none;
+}
+
+output {
+	display: inline-block; 		/* Allows the element to accept width */
+	width: 100%;				/* Fills the entire table cell width */
+	box-sizing: border-box;		/* Includes padding and borders in the 100% width rightAlign*/
+	border: 0px solid black;	
+}
+
+select {
+	border: 1px solid black;
+}
+
+.both-toggle varjit {
+	margin-left: auto; 
+	margin-right: 0;
+}
