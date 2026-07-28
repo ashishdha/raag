@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About Naadaalay DB &amp; Its Conventions</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="new/database.js"></script>
+<style>
+  :root{
+    --bg:           #07050c;
+    --bg-panel:     #0e0a18;
+    --bg-input:     #120c20;
+    --purple:       #a430ff;
+    --purple-bright:#c971ff;
+    --turq:         #00e8d6;
+    --turq-bright:  #6cfff2;
+    --green:        #00ff66;
+    --red:          #ff5c7a;
+    --text:         #f0f0ff;
+    --text-dim:     #aba4f3;
+    --border:       rgba(164, 48, 255, 0.22);
+    --border-soft:  rgba(164, 48, 255, 0.12);
+    --radius:       10px;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+    --display: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior: auto; } *{ transition:none !important; animation:none !important; } }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--display);
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(ellipse 900px 500px at 10% -10%, rgba(164,48,255,0.14), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(0,232,214,0.08), transparent 60%);
+    background-repeat: no-repeat;
+  }
+
+  a{ color: var(--turq-bright); }
+
+  /* ── TOC toggle (mobile) ───────────────────────────────── */
+  .toc-toggle{
+    display:none;
+    position: fixed;
+    top: 12px; left: 12px;
+    z-index: 50;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+
+  /* ── sidebar TOC ────────────────────────────────────────── */
+  nav.toc{
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 270px;
+    overflow-y: auto;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border-soft);
+    padding: 26px 18px 40px;
+  }
+  .toc-title{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--turq);
+    margin: 0 0 18px;
+  }
+  .toc-group{
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 20px 0 8px;
+  }
+  .toc-group:first-of-type{ margin-top: 0; }
+  a.toc-link{
+    display:block;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    text-decoration:none;
+    padding: 5px 8px;
+    border-radius: 7px;
+    border-left: 2px solid transparent;
+    line-height: 1.4;
+  }
+  a.toc-link:hover{ color: var(--text); background: rgba(164,48,255,0.06); }
+  a.toc-link.active{
+    color: var(--turq-bright);
+    border-left-color: var(--turq);
+    background: rgba(0,232,214,0.06);
+  }
+
+  /* ── main content ───────────────────────────────────────── */
+  main{
+    margin-left: 270px;
+    max-width: 760px;
+    padding: 48px 32px 120px;
+  }
+
+  header.page-head{ margin-bottom: 40px; }
+  header.page-head .eyebrow{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--turq);
+    margin: 0 0 14px;
+  }
+  header.page-head h1{
+    font-size: clamp(26px, 4vw, 36px);
+    line-height: 1.15;
+    margin: 0 0 16px;
+    background: linear-gradient(120deg, var(--turq-bright), var(--purple-bright));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header.page-head p{ color: var(--text-dim); font-size: 15.5px; line-height: 1.7; }
+
+  section{
+    margin: 56px 0;
+    padding-top: 8px;
+    scroll-margin-top: 20px;
+  }
+
+  h2{
+    font-size: 21px;
+    display:flex;
+    align-items:baseline;
+    gap: 8px;
+    margin: 0 0 14px;
+    color: var(--text);
+  }
+  h2 .anchor{
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    text-decoration: none;
+    opacity: 0.5;
+  }
+  h2 .anchor:hover{ opacity: 1; color: var(--turq); }
+
+  p{ line-height: 1.75; font-size: 15.5px; margin: 0 0 14px; }
+  ul, ol.exercises{ line-height: 1.75; font-size: 15.5px; padding-left: 22px; }
+  li{ margin-bottom: 8px; }
+
+  code{
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--bg-input);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--turq-bright);
+  }
+
+  pre{
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 0 0 16px;
+  }
+  pre code{
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  aside{
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin: 0 0 16px;
+    font-size: 14.5px;
+    line-height: 1.7;
+    border: 1px solid var(--border-soft);
+    border-left-width: 3px;
+  }
+  aside p:last-child{ margin-bottom: 0; }
+  aside .aside-label{
+    display:block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  aside.chuck{ border-left-color: var(--turq); background: rgba(0,232,214,0.05); }
+  aside.chuck .aside-label{ color: var(--turq); }
+  aside.gotcha{ border-left-color: var(--red); background: rgba(255,92,122,0.05); }
+  aside.gotcha .aside-label{ color: var(--red); }
+  aside.try{ border-left-color: var(--green); background: rgba(0,255,102,0.05); }
+  aside.try .aside-label{ color: var(--green); }
+
+  .back-link{
+    display:inline-block;
+    margin-top: 4px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--border);
+  }
+  .back-link:hover{ color: var(--turq-bright); }
+
+  /* ── generic tables (small comparison table + the live one) ── */
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    margin: 0 0 20px;
+  }
+  th, td{
+    padding: 8px 12px;
+    border: 1px solid var(--border-soft);
+    text-align: left;
+    vertical-align: top;
+  }
+  th{
+    background: var(--bg-input);
+    color: var(--turq);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── the live transliteration table ───────────────────────── */
+  .translit-table-wrap{
+    max-height: 640px;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: 0 0 16px;
+  }
+  .translit-table-wrap table{ margin: 0; }
+  .translit-table-wrap thead th{
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  td.col-deva{ font-size: 17px; }
+  td.col-roman{ font-family: var(--mono); color: var(--turq-bright); font-weight: 600; white-space: nowrap; }
+  tr.type-divider td{
+    background: rgba(164,48,255,0.12);
+    color: var(--purple-bright);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  td.status{
+    text-align: center;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-style: italic;
+  }
+  td.status.error{ color: var(--red); font-style: normal; }
+
+  /* ── confidence scale strip ───────────────────────────────── */
+  .confidence-scale{
+    display:flex;
+    gap: 4px;
+    margin: 4px 0 20px;
+    max-width: 480px;
+  }
+  .confidence-scale span{
+    flex: 1 1 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 0;
+    border-radius: 6px;
+    color: #07050c;
+  }
+  .confidence-scale-labels{
+    display:flex;
+    justify-content: space-between;
+    max-width: 480px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin: -12px 0 16px;
+  }
+
+  details.source-block summary{
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--turq-bright);
+    padding: 10px 14px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  details.source-block[open] summary{ border-radius: var(--radius) var(--radius) 0 0; }
+
+  hr.rule{ border:none; border-top: 1px solid var(--border-soft); margin: 48px 0; }
+
+  footer{
+    margin-left: 270px;
+    padding: 20px 32px 60px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  @media (max-width: 900px){
+    .toc-toggle{ display:block; }
+    nav.toc{
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+      z-index: 40;
+      width: 82vw;
+      max-width: 320px;
+      padding-top: 64px;
+    }
+    nav.toc.open{ transform: translateX(0); box-shadow: 20px 0 40px rgba(0,0,0,0.5); }
+    main, footer{ margin-left: 0; padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="toc-toggle" id="tocToggle" aria-expanded="false" aria-controls="toc">☰ Contents</button>
+
+<nav class="toc" id="toc">
+  <p class="toc-title">Contents</p>
+
+  <p class="toc-group">Start Here</p>
+  <a class="toc-link" href="#welcome">Welcome to Naadaalay DB</a>
+  <a class="toc-link" href="#site-map">Around the Site</a>
+
+  <p class="toc-group">Naming &amp; Pronunciation</p>
+  <a class="toc-link" href="#transcription-philosophy">Transcription, Not Transliteration</a>
+  <a class="toc-link" href="#reading-rules">Reading the Spellings</a>
+  <a class="toc-link" href="#transliteration-table">Roman &harr; Devanaagaree Table</a>
+
+  <p class="toc-group">Data Quality</p>
+  <a class="toc-link" href="#confidence-ratings">Confidence Ratings</a>
+</nav>
+
+<main>
+
+<header class="page-head">
+  <p class="eyebrow">Naadaalay DB</p>
+  <h1>About Naadaalay DB &amp; Its Conventions</h1>
+  <p>
+    This page is a companion to the rest of the site: what this database is for, how its
+    pages fit together, and -- in some detail, since it's easy to get wrong -- exactly how
+    and why raag and term names are spelled the way they are.
+  </p>
+  <p>
+    Use the contents on the left to jump straight to what you need. The transliteration
+    table further down is loaded live from the database, so it always reflects the
+    project's current spelling conventions.
+  </p>
+</header>
+
+<section id="welcome">
+  <h2><a class="anchor" href="#welcome">#</a> Welcome to Naadaalay DB</h2>
+  <p>
+    Naadaalay DB is an attempt to treat Hindustaanee raagdaaree sangeet -- specifically the
+    raag, its melodic framework -- as something that can be catalogued with the same rigor
+    as any other structured body of knowledge, without losing sight of the fact that a raag
+    is, first and foremost, a musical and emotional experience, not just a scale.
+  </p>
+  <p>
+    Every raag in this database is reachable from first principles: a combined svarset
+    (which pitches are used at all), an aaroh and avaroh (the paths taken up and down), and
+    from those two simple facts, a whole cascade of derived structural properties --
+    jaati, thaat, symmetry, samvaad, moorchhanaa family, and dozens more -- calculated the
+    same way, every time, for every raag, whether it's Yaman or something far more obscure.
+    That consistency is the whole point: it means two raags can be honestly compared,
+    searched, and filtered against each other on their actual musical structure, not just
+    on how well-documented they happen to be.
+  </p>
+  <p>
+    None of this replaces the tradition itself, a teacher, or years of riyaaz. It's meant
+    as a companion -- a way to ask precise questions ("which raags share Bhairav's svarset
+    but invert its samvaad?") that would otherwise mean flipping through a dozen books, and
+    to make space for raags that are structurally valid and interesting even if they've
+    never been formally named or performed.
+  </p>
+  <aside class="chuck">
+    <span class="aside-label">how it's built</span>
+    <p>
+      Every calculated column -- thaat, jaati, symmetry, samvaad, and so on -- is generated
+      once by a program that works through every valid aaroh/avaroh combination, and is
+      never edited by hand afterward. Only the human layer of a raag's entry -- its name,
+      creator, samay, and notes -- is entered manually, and can change as research or
+      performance practice reveals more.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="site-map">
+  <h2><a class="anchor" href="#site-map">#</a> Around the Site</h2>
+  <p>
+    The site is a few focused pages rather than one do-everything screen. Here's what each
+    one is for:
+  </p>
+  <ul>
+    <li><strong>Raag Table</strong> (the landing page) -- every catalogued raag at a glance:
+      name, aaroh, avaroh, dimension. The simplest way to browse.</li>
+    <li><strong>Advanced Raag Search</strong> -- the full dataset, with five tiers of columns
+      (Minimum through Maximum), svar-based filtering, notation switching between five
+      systems, and a build-your-own filter panel for anything the presets don't cover.</li>
+    <li><strong>ThaaT Explorer</strong> -- the 32 parent scale-frameworks (thaats) that every
+      raag's combined svarset ultimately belongs to, and how raags cluster underneath each
+      one.</li>
+    <li><strong>Scales</strong> -- the underlying mathematics: all 4096 possible twelve-tone
+      combinations, with their jaati, symmetry, samvaad, and moorchhanaa-family
+      relationships, whether or not they're used as a raag at all.</li>
+    <li><strong>Glossary</strong> -- plain-language definitions for every Hindustaanee term
+      used across the site (svar, jaati, thaat, samvaad, moorchhanaa, ang, samay, and
+      more).</li>
+    <li><strong>User Guide</strong> -- a walkthrough of the Advanced Search page's filters,
+      presets, and notation options.</li>
+    <li><strong>This page</strong> -- the project's own reasoning: why it exists, and
+      exactly how its spellings work.</li>
+  </ul>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="transcription-philosophy">
+  <h2><a class="anchor" href="#transcription-philosophy">#</a> Transcription, Not Transliteration</h2>
+  <p>
+    Every romanized spelling on this site -- raag names, thaat names, terms like
+    <code>svarsthaan</code> or <code>samvaad</code> -- is built to <strong>transcribe how
+    the word is actually said</strong> in everyday Hindustaanee musical speech, not to
+    <strong>transliterate its classical Devanaagaree spelling letter by letter</strong>.
+    Those two goals usually agree, but not always -- and wherever they disagree, this
+    project always chooses the sound over the spelling.
+  </p>
+  <p>
+    The clearest place this shows up is a phenomenon linguists call <em>schwa
+    deletion</em>. Every Devanaagaree consonant carries an inherent, unwritten "a" sound by
+    default -- क on its own is read "ka", not just "k". But in spoken Hindi, that inherent
+    "a" is very often silent, especially at the end of a word, even though nothing in the
+    written Devanaagaree marks this difference. थाट, read strictly letter-by-letter, would
+    be "thaata" -- but nobody says that; it's said "thaat". So Naadaalay DB spells it
+    <code>thaaT</code>, not <code>thaaTa</code>.
+  </p>
+  <p>The same thing happens constantly in raag names you likely already know:</p>
+  <table>
+    <thead>
+      <tr><th>Devanaagaree</th><th>Read letter-by-letter</th><th>Actually said</th><th>Naadaalay DB spelling</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>थाट</td><td>thaata</td><td>thaat</td><td><code>thaaT</code></td></tr>
+      <tr><td>भैरव</td><td>bhairava</td><td>bhairav</td><td><code>Bhairav</code></td></tr>
+      <tr><td>यमन</td><td>yamana</td><td>yaman</td><td><code>Yaman</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    This project's spellings always follow the third column, not the second.
+  </p>
+  <aside class="gotcha">
+    <span class="aside-label">common misconception</span>
+    <p>
+      Don't expect every Devanaagaree akshara to correspond to one roman syllable in a
+      displayed name. A name here is a transcription of pronunciation, not a mechanical
+      letter-count of the original spelling -- some written vowels are silent, and this
+      scheme doesn't write them.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="reading-rules">
+  <h2><a class="anchor" href="#reading-rules">#</a> Reading the Spellings</h2>
+  <p>A quick recap of the rules that produce every spelling on the site:</p>
+  <ul>
+    <li>Long vowels are doubled: <code>aa</code>, <code>ee</code>, <code>oo</code>. Short
+      vowels are single: <code>a</code>, <code>i</code>, <code>u</code>.</li>
+    <li>Aspirated consonants get a trailing <code>h</code>: <code>kh</code>, <code>gh</code>,
+      <code>jh</code>, <code>bh</code>, and so on.</li>
+    <li>Retroflex consonants are CAPITALIZED: <code>T Th D Dh N L</code>. Nothing else is
+      capitalized, with two explicit exceptions: <code>Sh</code> for ष, and <code>R</code>
+      for ऋ.</li>
+    <li>Conjoint (compound) letters mostly just spell out their parts: त्र = <code>tr</code>,
+      श्र = <code>shr</code>. Two are irregular and kept as fixed traditional spellings:
+      क्ष = <code>ksh</code>, ज्ञ = <code>jñ</code>.</li>
+  </ul>
+  <aside class="chuck">
+    <span class="aside-label">two more exceptions</span>
+    <p>
+      Two marks needed capital letters that fall outside the retroflex/ष/ऋ list above,
+      purely to avoid colliding with spellings that already existed: <code>M</code> for
+      anusvaar (ं) and <code>H</code> for visarga (ः). Neither ever appears standalone
+      anywhere else in this scheme, so there's no ambiguity.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="transliteration-table">
+  <h2><a class="anchor" href="#transliteration-table">#</a> The Full Roman &harr; Devanaagaree Table</h2>
+  <p>
+    This table is the single source of truth for every romanized spelling used on the
+    site -- it's the actual <code>transliterations</code> table in the database, loaded
+    live below. If a spelling ever changes in the database, this page reflects it
+    automatically next time it loads.
+  </p>
+  <p>
+    The Hindi and English example columns are informal pronunciation aids, not a strict
+    application of the rules above applied to the example word itself -- they're there to
+    help you hear the sound, not to demonstrate the spelling convention.
+  </p>
+  <div class="translit-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Devanaagaree</th>
+          <th>Roman</th>
+          <th>Tamil</th>
+          <th>Hindi Example</th>
+          <th>English Example</th>
+        </tr>
+      </thead>
+      <tbody id="translit-body">
+        <tr><td colspan="5" class="status">Loading transliteration table…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <aside class="try">
+    <span class="aside-label">try it</span>
+    <p>
+      Stuck on how to say a raag name or term you've seen elsewhere on the site? Find its
+      sounds here -- e.g. a capital <code>T</code>/<code>D</code>/<code>N</code> tells you
+      the tongue curls back further than in English, and a doubled vowel normally means a more open sound, held a bit longer.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+<section id="confidence-ratings">
+  <h2><a class="anchor" href="#confidence-ratings">#</a> Confidence Ratings</h2>
+  <p>
+    Every raag row carries a confidence rating from 1 to 10, reflecting how solidly its
+    <strong>non-computed</strong> information -- its name, attribution, samay, and notes --
+    is actually established, as opposed to being a reasonable but less certain guess.
+  </p>
+  <p>
+    This matters because of how the database is built: every structurally valid
+    combination of aaroh and avaroh gets a row, whether or not it corresponds to a raag
+    that's actually named, attested, or performed anywhere in the tradition. The computed
+    columns (thaat, jaati, symmetry, and so on) are always exactly correct by construction
+    -- they're arithmetic. The confidence rating is about everything else: how sure we can
+    be that this specific svarset really is the raag it's labeled as, rather than a
+    plausible but coincidental match.
+  </p>
+  <div class="confidence-scale">
+    <span style="background:#ff5c7a">1</span>
+    <span style="background:#ff6f6a">2</span>
+    <span style="background:#ff8f5a">3</span>
+    <span style="background:#ffab4d">4</span>
+    <span style="background:#ffc93f">5</span>
+    <span style="background:#e3d94a">6</span>
+    <span style="background:#c3e34f">7</span>
+    <span style="background:#9fe35c">8</span>
+    <span style="background:#6be36e">9</span>
+    <span style="background:#00ff66">10</span>
+  </div>
+  <div class="confidence-scale-labels">
+    <span>tentative / single source</span>
+    <span>essentially undisputed</span>
+  </div>
+  <p>
+    Roughly: a 1&ndash;3 marks a tentative or single-source identification; 4&ndash;7 marks
+    a reasonably well-attested raag with some remaining uncertainty (a disputed creator, a
+    name that varies by gharaanaa); 8&ndash;10 marks a raag whose identity, name, and
+    classification are essentially beyond dispute -- the Yamans and Bhairavs of the
+    tradition.
+  </p>
+  <aside class="gotcha">
+    <span class="aside-label">placeholder -- please verify</span>
+    <p>
+      This section is a first-pass guess at the intent behind the rating, not a confirmed
+      description of your actual criteria. If the real scale works differently -- or
+      confidence applies to something beyond naming/attribution -- let me know and this
+      gets rewritten precisely.
+    </p>
+  </aside>
+  <a class="back-link" href="#toc">↑ contents</a>
+</section>
+
+</main>
+
+<footer>
+  Naadaalay DB &mdash; About &amp; Conventions. The transliteration table above loads live
+  from Supabase, so this page needs a network connection to render fully.
+</footer>
+
+<script>
+(function(){
+  // ── mobile TOC toggle ──────────────────────────────────────
+  var toggle = document.getElementById('tocToggle');
+  var toc = document.getElementById('toc');
+  toggle.addEventListener('click', function(){
+    var open = toc.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  toc.querySelectorAll('a.toc-link').forEach(function(link){
+    link.addEventListener('click', function(){
+      toc.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  // ── scroll-spy: highlight the current section's TOC link ──
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+  var links = {};
+  toc.querySelectorAll('a.toc-link').forEach(function(link){
+    links[link.getAttribute('href').slice(1)] = link;
+  });
+
+  if ('IntersectionObserver' in window){
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var link = links[entry.target.id];
+        if (!link) return;
+        if (entry.isIntersecting){
+          Object.keys(links).forEach(function(id){ links[id].classList.remove('active'); });
+          link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -75% 0px', threshold: 0 });
+
+    sections.forEach(function(s){ observer.observe(s); });
+  }
+})();
+
+// ── transliteration table: live-loaded via database.js's fetchTable() ──
+(function(){
+  var TYPE_LABELS = {
+    vowel: 'Independent Vowels',
+    maatraa: 'Vowel Signs (Maatraa)',
+    consonant: 'Consonants',
+    nuqtaa: 'Nuqtaa Consonants (Loan Sounds)',
+    conjoint: 'Conjoint Letters',
+    modifier: 'Modifiers & Marks',
+    punctuation: 'Punctuation'
+  };
+
+  var tbody = document.getElementById('translit-body');
+
+  function cell(text){
+    var td = document.createElement('td');
+    td.textContent = (text === null || text === undefined || text === '') ? '—' : text;
+    return td;
+  }
+
+  async function init(){
+    try{
+      var rows = await fetchTable('transliterations', {
+        columns: 'roman,devanaagaree,tamil,example_hindi,example_english,type',
+        sortColumn: 'id'
+      });
+
+      tbody.innerHTML = '';
+      var lastType = null;
+
+      rows.forEach(function(row){
+        if (row.type !== lastType){
+          var divider = document.createElement('tr');
+          divider.className = 'type-divider';
+          var dtd = document.createElement('td');
+          dtd.colSpan = 5;
+          dtd.textContent = TYPE_LABELS[row.type] || row.type;
+          divider.appendChild(dtd);
+          tbody.appendChild(divider);
+          lastType = row.type;
+        }
+
+        var tr = document.createElement('tr');
+
+        var tdDeva = document.createElement('td');
+        tdDeva.className = 'col-deva';
+        tdDeva.textContent = row.devanaagaree === '' ? '(none)' : row.devanaagaree;
+
+        var tdRoman = document.createElement('td');
+        tdRoman.className = 'col-roman';
+        tdRoman.textContent = row.roman === '' ? '(silent)' : row.roman;
+
+        tr.appendChild(tdDeva);
+        tr.appendChild(tdRoman);
+        tr.appendChild(cell(row.tamil));
+        tr.appendChild(cell(row.example_hindi));
+        tr.appendChild(cell(row.example_english));
+        tbody.appendChild(tr);
+      });
+    } catch(err){
+      tbody.innerHTML = '';
+      var tr2 = document.createElement('tr');
+      var td2 = document.createElement('td');
+      td2.colSpan = 5;
+      td2.className = 'status error';
+      td2.textContent = 'Could not load the transliteration table — ' + (err.message || err);
+      tr2.appendChild(td2);
+      tbody.appendChild(tr2);
+    }
+  }
+
+  init();
+})();
+</script>
+
+</body>
+</html>
