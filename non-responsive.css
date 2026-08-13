@@ -1,0 +1,107 @@
+/* ============================================================
+   non-responsive.css
+   Deliberately NOT fluid. No clamp(), no JS-driven resize math.
+   Three fixed device buckets (mobile / tablet / laptop+desktop),
+   each with a plain vh-based table height for "feel" AND a flat
+   pixel floor that flexbox is physically not allowed to shrink
+   below (min-height + flex-shrink:0). That floor is the actual
+   guarantee behind "minimum 10 rows always visible" — the vh
+   number alone can never promise that on a small enough window.
+
+   Load this file AFTER raags.css / raag_naming.css / raags_search.css
+   so these rules win the cascade. !important is used deliberately
+   on the load-bearing properties, since silent override-losses are
+   exactly what broke the last two attempts.
+   ============================================================ */
+
+/* ── stop fighting the page for height ───────────────────────
+   The old bug: body was height-constrained (100vh/100dvh) inside
+   a flex column, so when the header grew taller (filters wrapping
+   on a narrower window), flexbox shrank main/.table-shell to
+   compensate — right through the old clamp() floor, because
+   clamp() only sets a *preferred* size, not a shrink limit.
+   Fix: let the page flow naturally and scroll if it must. Nothing
+   here is Ever allowed to force the table below its floor.
+   ------------------------------------------------------------ */
+
+html, body{
+  height: auto !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important; /* only clips accidental horizontal spill at the page level */
+  overflow-y: visible !important;
+}
+
+header, footer{
+  flex: 0 0 auto !important; /* natural height, never stretched or shrunk */
+}
+
+main{
+  flex: 0 0 auto !important; /* no longer competes for leftover space — table sizes itself below */
+  min-height: 0 !important;
+}
+
+/* ── the guarantee ────────────────────────────────────────────
+   flex-shrink:0 is the actual fix. min-height is the actual floor.
+   The vh height is just a preference on top of that floor.
+   ------------------------------------------------------------ */
+
+.table-shell{
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  min-height: 440px !important; /* header row (~40px) + 10 body rows (~40px each) */
+}
+
+/* ============================================================
+   DEVICE BUCKETS — plain numbers, no interpolation
+   ============================================================ */
+
+/* MOBILE — up to 640px wide */
+@media (max-width: 640px){
+  .table-shell{
+    height: 50vh !important;
+    max-height: none !important;
+    min-height: 440px !important;
+  }
+}
+
+/* TABLET — 641px to 1024px wide */
+@media (min-width: 641px) and (max-width: 1024px){
+  .table-shell{
+    height: 55vh !important;
+    max-height: none !important;
+    min-height: 460px !important;
+  }
+}
+
+/* LAPTOP / DESKTOP — 1025px to 1439px wide */
+@media (min-width: 1025px) and (max-width: 1439px){
+  .table-shell{
+    height: 60vh !important;
+    max-height: none !important;
+    min-height: 480px !important;
+  }
+}
+
+/* LARGE DESKTOP — 1440px and up */
+@media (min-width: 1440px){
+  .table-shell{
+    height: 65vh !important;
+    max-height: none !important;
+    min-height: 500px !important;
+  }
+}
+
+/* ── landscape phones: viewport height itself is often tiny ───
+   Here the floor matters far more than the vh number, so vh is
+   dropped in favor of a slightly shorter but still guaranteed floor.
+   ------------------------------------------------------------ */
+@media (max-width: 900px) and (max-height: 480px) and (orientation: landscape){
+  .table-shell{
+    height: auto !important;
+    min-height: 400px !important;
+  }
+}

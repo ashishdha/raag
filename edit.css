@@ -1,0 +1,241 @@
+/* ============================================================
+   edit.css — supplemental styles for edit.html
+   Loaded AFTER raag_naming.css + non-responsive.css, so all the
+   color variables (--turq, --purple, --green, --red, --text-dim,
+   --bg-panel, --bg-input, --border, --radius, --mono, --display)
+   and base classes (.name-input, .both-toggle, .reset, .eyebrow,
+   .field, .field-wrap) already exist. This file only adds what's new.
+   ============================================================ */
+
+/* ── auth bar (top-right of header) ─────────────────────────── */
+
+.auth-bar{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.signed-in-as{
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.signed-in-as em{ color: var(--turq-bright); font-style: normal; }
+
+.login-form{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.login-form input{ width: 200px; }
+.login-error{
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--red);
+}
+
+/* ── access denied card ─────────────────────────────────────── */
+
+.access-denied{
+  max-width: 560px;
+  margin: 60px auto;
+  padding: 24px 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  text-align: center;
+}
+.access-denied p{ color: var(--text-dim); line-height: 1.6; margin: 0; }
+
+/* ── filter bar (ported from index.html/advanced.js) ─────────────
+   .filter-row, .svar-group*, .mode-toggle, .toggle-row, .field*,
+   .chips/.chip, .both-toggle*, .dim-pair, .filter-actions, .reset
+   are ALL already fully styled in raag_naming.css — this block only
+   adds the handful of classes that file doesn't define. */
+
+.filter-bar{
+  padding: 18px clamp(16px, 4vw, 48px) 4px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.field.grow{ flex: 1 1 auto; min-width: 200px; }
+
+.filter-hint{
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-right: auto;
+}
+
+button.btn-apply{
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #07050c;
+  background: var(--turq);
+  border: 1px solid var(--turq);
+  border-radius: var(--radius);
+  padding: 11px 18px;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+button.btn-apply:hover{ filter: brightness(1.1); }
+
+/* ── matches panel (new — not part of index.html) ────────────────── */
+
+.matches-panel{
+  padding: 4px clamp(16px, 4vw, 48px) 0;
+}
+.matches-header{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.matches-header .field{ margin-left: auto; min-width: 160px; }
+
+.matches-list{
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+}
+.match-item{
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 7px 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-soft);
+}
+.match-item:last-child{ border-bottom: none; }
+.match-item:hover{ background: rgba(0,232,214,0.06); }
+.match-item.current{ background: rgba(0,232,214,0.12); }
+.match-id{ color: var(--turq-bright); flex-shrink: 0; }
+.match-name{ color: var(--text); }
+.match-name.unnamed{ color: var(--text-dim); font-style: italic; }
+
+/* ── read-only raag context strip ───────────────────────────── */
+
+.raag-context{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  padding: 14px clamp(16px, 4vw, 48px);
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.raag-context strong{ color: var(--turq-bright); }
+
+/* ── the edit table itself ──────────────────────────────────── */
+
+.edit-table{
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 20px;
+  border-collapse: collapse;
+  table-layout: fixed;   /* ← the actual fix, see explanation below */
+  font-family: var(--display);
+  font-size: 14px;
+}
+.edit-table thead th{
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--turq);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.edit-table td{
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: top;
+  overflow: hidden;          /* needed now that table-layout is fixed */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.edit-table tr:nth-child(even){ background: var(--bg-row-alt); }
+
+.col-property{ width: 26%; }
+.col-value{ width: 46%; }
+.col-status{ width: 28%; }
+
+.prop-label strong{
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  word-break: break-word;
+}
+.prop-desc{
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.edit-table .name-input{
+  width: 100%;
+  max-width: 100%;           /* prevents inputs/selects from forcing the column wider */
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+}
+.edit-table select.name-input{ cursor: pointer; }
+
+.locked-value{
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* ── status badges (edit-table + save bar share these modifiers) ── */
+
+.status-cell{
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: normal;
+}
+.status-valid{   color: var(--green); }
+.status-invalid{ color: var(--red); font-weight: 600; }
+.status-empty{   color: var(--text-dim); font-style: italic; }
+.status-locked{  color: var(--purple-bright); font-style: italic; }
+.status-saving{  color: var(--turq); }
+.status-saved{   color: var(--green); font-weight: 600; }
+.status-error{   color: var(--red); font-weight: 600; }
+
+/* ── save bar ────────────────────────────────────────────────── */
+
+.save-bar{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto 40px;
+  padding: 0 14px;
+}
+.save-status{
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+@media (max-width: 640px){
+  .edit-table{ font-size: 13px; }
+  .col-property{ width: 40%; }
+  .col-value{ width: 35%; }
+  .col-status{ width: 25%; }
+  .login-form input{ width: 140px; }
+}

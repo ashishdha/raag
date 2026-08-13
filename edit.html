@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Raag Data Entry · Naadaalay DB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="raag_naming.css">
+<link rel="stylesheet" href="non-responsive.css">
+<link rel="stylesheet" href="edit.css">
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Raag Data Entry · Naadaalay DB</p>
+  <div id="auth-bar" class="auth-bar"><!-- filled by edit.js: login form OR user info + sign out --></div>
+</header>
+
+<!-- Shown only to signed-in users whose role is NOT admin/editor/contributor -->
+<div id="access-denied" class="access-denied" hidden>
+  <p>Access message goes here.</p>
+</div>
+
+<!-- Shown only to signed-in users WITH an allowed role -->
+<main id="main-content" hidden>
+
+  <!-- ══════════════════════ FILTER BAR ══════════════════════
+       Ported from index.html / advanced.js (same element ids, so edit.js's
+       filter logic is a near-direct port of runFilters()) — everything
+       EXCEPT the id="custom-block" advanced-filter builder, per your request.
+       Classes are renamed to the equivalents already styled in raag_naming.css
+       (svar-panel→svar-group, svar-row→filter-row, etc.) rather than pulling
+       in advanced.css, so this stays visually consistent with the rest of
+       edit.html. See the chat response for the exact mapping. -->
+  <section class="filter-bar">
+
+    <div class="filter-row">
+      <div class="svar-group present">
+        <div class="svar-group-head">
+          <span class="svar-group-title present">Present Svar</span>
+          <div class="toggle-row">
+            <div class="mode-toggle present">
+              <input type="radio" name="present-inex" id="present-inex-inclusive" value="inclusive">
+              <label for="present-inex-inclusive">Inclusive</label>
+              <input type="radio" name="present-inex" id="present-inex-exclusive" value="exclusive" checked>
+              <label for="present-inex-exclusive">Exclusive</label>
+            </div>
+            <div class="mode-toggle present">
+              <input type="radio" name="present-mode" id="present-mode-specific" value="specific" checked>
+              <label for="present-mode-specific">Specific</label>
+              <input type="radio" name="present-mode" id="present-mode-generic" value="generic">
+              <label for="present-mode-generic">Generic</label>
+            </div>
+          </div>
+        </div>
+        <div class="svar-group-boxes">
+          <div class="field">
+            <label for="present-aaroh-input">Aaroh</label>
+            <div class="field-wrap present">
+              <input id="present-aaroh-input" type="text" placeholder="e.g. G r" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="chips" id="present-aaroh-chips"></div>
+          </div>
+          <div class="both-toggle-wrap">
+            <button type="button" class="both-toggle present" id="present-both-toggle" aria-pressed="true" title="Mirror input to both Aaroh and Avaroh">Both</button>
+          </div>
+          <div class="field">
+            <label for="present-avaroh-input">Avaroh</label>
+            <div class="field-wrap present">
+              <input id="present-avaroh-input" type="text" placeholder="e.g. G r" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="chips" id="present-avaroh-chips"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="svar-group varjit">
+        <div class="svar-group-head">
+          <span class="svar-group-title varjit">Varjit Svar</span>
+          <div class="toggle-row">
+            <div class="mode-toggle varjit">
+              <input type="radio" name="varjit-inex" id="varjit-inex-inclusive" value="inclusive" checked>
+              <label for="varjit-inex-inclusive">Inclusive</label>
+              <input type="radio" name="varjit-inex" id="varjit-inex-exclusive" value="exclusive">
+              <label for="varjit-inex-exclusive">Exclusive</label>
+            </div>
+            <div class="mode-toggle varjit">
+              <input type="radio" name="varjit-mode" id="varjit-mode-specific" value="specific">
+              <label for="varjit-mode-specific">Specific</label>
+              <input type="radio" name="varjit-mode" id="varjit-mode-generic" value="generic" checked>
+              <label for="varjit-mode-generic">Generic</label>
+            </div>
+          </div>
+        </div>
+        <div class="svar-group-boxes">
+          <div class="field">
+            <label for="varjit-aaroh-input">Aaroh</label>
+            <div class="field-wrap varjit">
+              <input id="varjit-aaroh-input" type="text" placeholder="e.g. N d" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="chips" id="varjit-aaroh-chips"></div>
+          </div>
+          <div class="both-toggle-wrap">
+            <button type="button" class="both-toggle varjit" id="varjit-both-toggle" aria-pressed="true" title="Mirror input to both Aaroh and Avaroh">Both</button>
+          </div>
+          <div class="field">
+            <label for="varjit-avaroh-input">Avaroh</label>
+            <div class="field-wrap varjit">
+              <input id="varjit-avaroh-input" type="text" placeholder="e.g. N d" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="chips" id="varjit-avaroh-chips"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <div class="field">
+        <label for="status-filter">Status</label>
+        <select id="status-filter">
+          <option value="all" selected>All</option>
+          <option value="named">Named</option>
+          <option value="unnamed">Unnamed</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="dimension-filter">Dimension</label>
+        <select id="dimension-filter">
+          <option value="any" selected>Any</option>
+          <option value="1">1 · Identical</option>
+          <option value="2">2 · Different</option>
+          <option value="3">3 · Vakra</option>
+          <option value="4">4 · JoD</option>
+          <option value="5">5 · Raagish</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="aaroh-jaati-compare">Aaroh Jaati</label>
+        <div class="dim-pair">
+          <select id="aaroh-jaati-compare">
+            <option value="min">Min</option>
+            <option value="exactly" selected>Exactly</option>
+            <option value="max">Max</option>
+          </select>
+          <select id="aaroh-jaati-value">
+            <option value="any" selected>Any</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="avaroh-jaati-compare">Avaroh Jaati</label>
+        <div class="dim-pair">
+          <select id="avaroh-jaati-compare">
+            <option value="min">Min</option>
+            <option value="exactly" selected>Exactly</option>
+            <option value="max">Max</option>
+          </select>
+          <select id="avaroh-jaati-value">
+            <option value="any" selected>Any</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field grow">
+        <label for="search-input">Name / ID</label>
+        <div class="field-wrap">
+          <input id="search-input" type="text" placeholder="search name or id — Enter to apply" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <span class="filter-hint" id="filter-hint">Adjust filters, then Apply.</span>
+      <button class="reset" id="reset-btn" type="button">Reset</button>
+      <button class="btn-apply" id="apply-btn" type="button">Apply</button>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════ MATCHES PANEL ══════════════════════
+       Not part of index.html — something has to actually pick which ONE
+       raag loads into the editor below. Prev/Next/Next-Unnamed all step
+       through whatever the filter bar above last matched. -->
+  <div class="matches-panel">
+    <div class="matches-header">
+      <span id="matches-count" class="eyebrow">— matches</span>
+      <button id="prev-btn" type="button" class="both-toggle">◀ Prev</button>
+      <button id="next-btn" type="button" class="both-toggle">Next ▶</button>
+      <button id="next-unnamed-btn" type="button" class="both-toggle">Next Unnamed →</button>
+      <div class="field">
+        <label for="notation-select">Notation</label>
+        <select id="notation-select">
+          <option value="0" selected>Hindustaanee Sargam</option>
+          <option value="1">Western</option>
+          <option value="2">Jazz Scale Degrees</option>
+          <option value="3">Carnatic</option>
+        </select>
+      </div>
+    </div>
+    <div id="matches-list" class="matches-list"></div>
+  </div>
+
+  <div id="raag-context" class="raag-context"><!-- read-only context, filled by edit.js --></div>
+
+  <table class="edit-table">
+    <thead>
+      <tr>
+        <th class="col-property">Raag Property</th>
+        <th class="col-value">Value</th>
+        <th class="col-status">Status</th>
+      </tr>
+    </thead>
+    <tbody id="edit-table-body">
+      <tr><td colspan="3" class="status" id="edit-status-row">Loading…</td></tr>
+    </tbody>
+  </table>
+
+  <div class="save-bar">
+    <button id="save-btn" type="button" class="both-toggle present">Save Changes</button>
+    <span id="save-status" class="save-status"></span>
+  </div>
+
+</main>
+
+<footer>
+  <span class="eyebrow" id="footer-info">Naadaalay DB</span>
+</footer>
+
+<!-- Supabase JS library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Your hand-written db helpers: fetchTable, cacheTable, loadMusicData, loadRaagMetadata,
+     getCachedTableData, populateSelectMenu, setNotationSystem, notation conversion, errorAlert -->
+<script src="database.js"></script>
+<!-- This page's own logic -->
+<script src="edit.js"></script>
+
+</body>
+</html>
